@@ -1,9 +1,184 @@
-<html>
+<html lang="en">
   <head>
+    <title>Browser test</title>
+    <meta charset="UTF-8">
     <script src="./dist/esbuild/browser.js"></script>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/typescript-boilerplate-2021"></script> -->
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','YOUR-GTM-ID');</script>
+    <!-- End Google Tag Manager -->
   </head>
   <body>
     Open the devtools 👇
+
+    <ol>
+      <li><button onclick="viewItemList()">View item list</button></li>
+      <li><button onclick="viewItem('SKU-000')">View First item</button></li>
+      <li><button onclick="addToCart('SKU-000')">Add First Item to cart</button></li>
+      <li><button onclick="viewItem('SKU-111')">View Second item</button></li>
+      <li><button onclick="addToCart('SKU-111', 2)">Add Second Item to cart</button></li>
+      <li><button onclick="viewCart([['SKU-000', 1], ['SKU-111', 2]])">View cart</button></li>
+      <li><button onclick="removeFromCart('SKU-111')">Remove 1 item from cart</button></li>
+      <li><button onclick="addShippingInfo([['SKU-000', 1], ['SKU-111', 1]])">Add shipping info</button></li>
+      <li><button onclick="addPaymentInfo([['SKU-000', 1], ['SKU-111', 1]])">Add payment info</button></li>
+      <li><button onclick="beginCheckout([['SKU-000', 1], ['SKU-111', 1]])">Begin checkout</button></li>
+      <li><button onclick="purchase([['SKU-000', 1], ['SKU-111', 1]])">Purchase</button></li>
+    </ol>
+
+    <script type="text/javascript">
+      const analytics = new Trackify.Constructor();
+      analytics.GLOBALS.brand = 'Dr Irena Eris';
+      analytics.GLOBALS.currency = 'PLN';
+
+      analytics.useDriver(Trackify.Drivers.TRACKIFY_DEBUG);
+      analytics.useDriver(Trackify.Drivers.TRACKIFY_GTM);
+      analytics.loadDrivers();
+
+      const items = {
+        'SKU-000': {
+          id: 'SKU-000',
+          name: 'First item',
+          affiliation: 'Official brand store',
+          category: 'Items',
+          category2: 'Men',
+          category3: 'Shirts',
+          category4: 'Summer',
+          category5: 'Outlet',
+          variant: 'yellow',
+          price: 99.00,
+        },
+        'SKU-111': {
+          id: 'SKU-111',
+          name: 'Second item',
+          affiliation: 'Official brand store',
+          category: 'Items',
+          category2: 'Women',
+          category3: 'Shirts',
+          category4: 'Summer',
+          category5: 'Outlet',
+          variant: 'blue',
+          price: 89.99,
+        }
+      }
+
+      function viewItemList() {
+        const event = new Trackify.Events.Sales.ViewItemListEvent({
+          listId: 'homepage',
+          listName: 'Home page',
+          items: [
+            items["SKU-000"],
+            items["SKU-111"]
+          ]
+        });
+
+        analytics.track(event);
+      }
+
+      function viewItem(id) {
+        const item = items[id];
+        const event = new Trackify.Events.Sales.ViewItemEvent({
+          value: item.price,
+          items: [
+            item
+          ]
+        });
+
+        analytics.track(event);
+      }
+
+      function addToCart(id, quantity = 1) {
+        const item = { ...items[id], quantity };
+        const event = new Trackify.Events.Sales.AddToCartEvent({
+          value: item.price * quantity,
+          items: [
+            item
+          ]
+        });
+
+        analytics.track(event);
+      }
+
+      function viewCart(cartItems) {
+        cartItems = cartItems.map(([id, quantity], index) => {
+          return { ...items[id], quantity, index};
+        });
+        const event = new Trackify.Events.Sales.ViewCartEvent({
+          value: cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0),
+          items: cartItems
+        });
+
+        analytics.track(event);
+      }
+
+      function removeFromCart(id, quantity = 1) {
+        const item = { ...items[id], quantity };
+        const event = new Trackify.Events.Sales.RemoveFromCartEvent({
+          value: item.price * quantity,
+          items: [
+            item
+          ]
+        });
+
+        analytics.track(event);
+      }
+
+      function addShippingInfo(cartItems) {
+        cartItems = cartItems.map(([id, quantity], index) => {
+          return { ...items[id], quantity, index};
+        });
+        const event = new Trackify.Events.Sales.AddShippingInfoEvent({
+          value: 15,
+          shippingMethod: 'inpost_kurier',
+          items: cartItems
+        });
+
+        analytics.track(event);
+      }
+
+      function addPaymentInfo(cartItems) {
+        cartItems = cartItems.map(([id, quantity], index) => {
+          return { ...items[id], quantity, index};
+        });
+        const event = new Trackify.Events.Sales.AddPaymentInfoEvent({
+          value: cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0),
+          paymentMethod: 'blik_pbl',
+          items: cartItems
+        });
+
+        analytics.track(event);
+      }
+
+      function beginCheckout(cartItems) {
+        cartItems = cartItems.map(([id, quantity], index) => {
+          return { ...items[id], quantity, index, coupon: 'COUPON_TEST', discount: 15.00};
+        });
+        const event = new Trackify.Events.Sales.BeginCheckoutEvent({
+          value: cartItems.reduce((acc, item) => acc + ((item.price - item.discount) * item.quantity), 0),
+          coupon: 'COUPON_TEST',
+          items: cartItems
+        });
+
+        analytics.track(event);
+      }
+
+      function purchase(cartItems) {
+        cartItems = cartItems.map(([id, quantity], index) => {
+          return { ...items[id], quantity, index, coupon: 'COUPON_TEST', discount: 15.00};
+        });
+        const event = new Trackify.Events.Sales.PurchaseEvent({
+          transactionId: 'TRANS-000',
+          value: cartItems.reduce((acc, item) => acc + ((item.price - item.discount) * item.quantity), 0),
+          coupon: 'COUPON_TEST',
+          items: cartItems,
+          shipping: 15,
+          tax: 23
+        });
+
+        analytics.track(event);
+      }
+    </script>
   </body>
 </html>
