@@ -1,4 +1,4 @@
-import {AnalyticsDriver} from "../interfaces/analytics-driver";
+import {AnalyticsDriver, AnalyticsDriverConfig} from "../interfaces/analytics-driver";
 import {AnalyticsEvent} from "../interfaces/analytics-event";
 import {
   AddPaymentInfoConfig,
@@ -58,9 +58,9 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
 
   protected layerId = 'dataLayer';
 
-  constructor(config?: { layerId: string }) {
+  constructor(config: AnalyticsDriverConfig) {
     if (config && config.layerId) {
-      this.layerId = config.layerId;
+      this.layerId = config.layerId as string;
     }
   }
 
