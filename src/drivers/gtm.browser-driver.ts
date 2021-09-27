@@ -16,6 +16,7 @@ import {CurrencyCode} from "../interfaces/trackify-globals";
 declare global {
   interface Window {
     dataLayer: Array<{ event?: string, ecommerce: Record<string, unknown> | null }>;
+    [p: string]: unknown | Array<unknown>,
   }
 }
 
@@ -206,8 +207,10 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   }
 
   protected push(eventName: string, payload: Record<string, string | number | CurrencyCode | Array<GTMItem> | undefined>): void {
-    window.dataLayer.push({ecommerce: null});
-    window.dataLayer.push({
+    const dataLayer: Array<unknown> = Object.prototype.hasOwnProperty.call(window, this.layerId) ? window[this.layerId] as Array<unknown> : [];
+
+    dataLayer.push({ecommerce: null});
+    dataLayer.push({
       event: eventName,
       ecommerce: payload,
     });
