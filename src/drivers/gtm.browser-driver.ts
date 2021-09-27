@@ -66,6 +66,8 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   }
 
   public async load(): Promise<boolean> {
+    window[this.layerId] = window[this.layerId] || [];
+
     return Object.prototype.hasOwnProperty.call(window, this.layerId);
   }
 
@@ -207,10 +209,8 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   }
 
   protected push(eventName: string, payload: Record<string, string | number | CurrencyCode | Array<GTMItem> | undefined>): void {
-    const dataLayer: Array<unknown> = Object.prototype.hasOwnProperty.call(window, this.layerId) ? window[this.layerId] as Array<unknown> : [];
-
-    dataLayer.push({ecommerce: null});
-    dataLayer.push({
+    (window[this.layerId] as Array<unknown>).push({ecommerce: null});
+    (window[this.layerId] as Array<unknown>).push({
       event: eventName,
       ecommerce: payload,
     });
