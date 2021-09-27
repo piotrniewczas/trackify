@@ -8,13 +8,13 @@ export default class DebugServerDriver implements AnalyticsDriver {
     return true;
   }
 
-  public supportsEvent(event: AnalyticsEvent): boolean {
+  public supportsEvent(event: AnalyticsEvent<unknown>): boolean {
     console.debug('[Trackify] Method `supportsEvent` called.', event);
 
     return true;
   }
 
-  public async track(event: AnalyticsEvent): Promise<void> {
+  public async track(event: AnalyticsEvent<unknown>): Promise<void> {
     console.debug('[Trackify] Method `track` called.', event);
   }
 }

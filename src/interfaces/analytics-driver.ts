@@ -3,9 +3,9 @@ import {AnalyticsEvent} from "./analytics-event";
 export interface AnalyticsDriver {
   load(): Promise<boolean>;
 
-  supportsEvent(event: AnalyticsEvent): boolean;
+  supportsEvent(event: AnalyticsEvent<unknown>): boolean;
 
-  track(event: AnalyticsEvent): Promise<void>;
+  track(event: AnalyticsEvent<unknown>): Promise<void>;
 }
 
 export type AnalyticsDriverConfig = Record<string, unknown>;

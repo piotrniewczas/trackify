@@ -7,15 +7,15 @@ export class TrackifyQueue implements AnalyticsQueue {
     processing: false
   };
 
-  protected runCallback!: (event: AnalyticsEvent) => void;
+  protected runCallback!: (event: AnalyticsEvent<unknown>) => void;
 
-  protected eventQueue: AnalyticsEvent[] = [];
+  protected eventQueue: AnalyticsEvent<unknown>[] = [];
 
-  onProcessed(callback: (event: AnalyticsEvent) => void): void {
+  onProcessed(callback: (event: AnalyticsEvent<unknown>) => void): void {
     this.runCallback = callback;
   }
 
-  push(event: AnalyticsEvent): void {
+  push(event: AnalyticsEvent<unknown>): void {
     this.eventQueue.push(event);
 
     this.process();
