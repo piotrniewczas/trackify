@@ -56,8 +56,16 @@ export type SupportedEvent = AnalyticsEvent<SupportedEventData>;
 export default class GTMBrowserDriver implements AnalyticsDriver {
   public static SUPPORTED_EVENTS = ['add_payment_info', 'add_shipping_info', 'add_to_cart', 'begin_checkout', 'purchase', 'remove_from_cart', 'view_cart', 'view_item', 'view_item_list'];
 
+  protected layerId = 'dataLayer';
+
+  constructor(config?: { layerId: string }) {
+    if (config && config.layerId) {
+      this.layerId = config.layerId;
+    }
+  }
+
   public async load(): Promise<boolean> {
-    return typeof window.dataLayer !== 'undefined';
+    return Object.prototype.hasOwnProperty.call(window, this.layerId);
   }
 
   public supportsEvent(event: AnalyticsEvent<unknown>): boolean {
