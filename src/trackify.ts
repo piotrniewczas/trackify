@@ -13,6 +13,7 @@ import {TrackifyGlobals} from "./interfaces/trackify-globals";
 export class Trackify {
   public static QUEUE_DRIVER: AnalyticsQueueConstructor = TrackifyQueue;
   public GLOBALS: TrackifyGlobals = {
+    affiliation: null,
     currency: null,
     brand: null,
   };

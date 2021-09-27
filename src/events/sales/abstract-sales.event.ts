@@ -26,5 +26,19 @@ export abstract class AbstractSalesEvent extends AbstractEvent {
         return item;
       });
     }
+
+    if (globals.affiliation && Object.prototype.hasOwnProperty.call(this.getData(), 'affiliation') && !this.config.affiliation) {
+      this.config.affiliation = globals.affiliation;
+    }
+
+    if (globals.affiliation && Array.isArray(this.config.items)) {
+      this.config.items = this.config.items.map(item => {
+        if (item.affiliation === undefined) {
+          item.affiliation = globals.affiliation as string;
+        }
+
+        return item;
+      })
+    }
   }
 }

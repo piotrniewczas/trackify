@@ -159,6 +159,7 @@ export enum CurrencyCode {
 }
 
 export interface TrackifyGlobals {
+  affiliation: string | null,
   currency: CurrencyCode | null;
   brand: string | null;
 }
