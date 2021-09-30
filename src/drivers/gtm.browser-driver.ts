@@ -151,7 +151,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   protected async trackAddPaymentInfo(data: AddPaymentInfoConfig): Promise<void> {
     this.pushEcommerce('add_payment_info', {
       currency: data.currency,
-      value: data.value,
+      value: this.monetaryValue(data.value),
       coupon: data.coupon,
       payment_type: data.paymentMethod,
       items: this.getItems(data),
@@ -161,7 +161,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   protected async trackAddShippingInfo(data: AddShippingInfoConfig): Promise<void> {
     this.pushEcommerce('add_shipping_info', {
       currency: data.currency,
-      value: data.value,
+      value: this.monetaryValue(data.value),
       coupon: data.coupon,
       shipping_tier: data.shippingTier,
       items: this.getItems(data),
@@ -171,7 +171,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   protected async trackAddToCart(data: AddToCartConfig): Promise<void> {
     this.pushEcommerce('add_to_cart', {
       currency: data.currency,
-      value: data.value,
+      value: this.monetaryValue(data.value),
       items: this.getItems(data),
     });
   }
@@ -179,7 +179,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   protected async trackBeginCheckout(data: BeginCheckoutConfig): Promise<void> {
     this.pushEcommerce('begin_checkout', {
       currency: data.currency,
-      value: data.value,
+      value: this.monetaryValue(data.value),
       coupon: data.coupon,
       items: this.getItems(data),
     });
@@ -189,11 +189,11 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
     this.pushEcommerce('purchase', {
       currency: data.currency,
       transaction_id: data.transactionId,
-      value: data.value,
+      value: this.monetaryValue(data.value),
       affiliation: data.affiliation,
       coupon: data.coupon,
-      shipping: data.shipping,
-      tax: data.tax,
+      shipping: data.shipping ? this.monetaryValue(data.shipping) : undefined,
+      tax: data.tax ? this.monetaryValue(data.tax) : undefined,
       items: this.getItems(data),
     });
   }
@@ -201,7 +201,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   protected async trackRemoveFromCart(data: RemoveFromCartConfig): Promise<void> {
     this.pushEcommerce('remove_from_cart', {
       currency: data.currency,
-      value: data.value,
+      value: this.monetaryValue(data.value),
       items: this.getItems(data),
     });
   }
@@ -209,7 +209,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   protected async trackViewCart(data: ViewCartConfig): Promise<void> {
     this.pushEcommerce('view_cart', {
       currency: data.currency,
-      value: data.value,
+      value: this.monetaryValue(data.value),
       items: this.getItems(data),
     });
   }
@@ -217,7 +217,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   protected async trackViewItem(data: ViewItemConfig): Promise<void> {
     this.pushEcommerce('view_item', {
       currency: data.currency,
-      value: data.value,
+      value: this.monetaryValue(data.value),
       items: this.getItems(data),
     });
   }
@@ -249,7 +249,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       affiliation: item.affiliation,
       coupon: item.coupon,
       currency: item.currency,
-      discount: item.discount,
+      discount: item.discount ? this.monetaryValue(item.discount) : undefined,
       index: typeof item.index === 'undefined' ? iteration + 1 : item.index + indexAdjuster,
       item_brand: item.brand,
       item_category: item.category,
@@ -261,7 +261,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       item_list_name: item.listName,
       item_variant: item.variant,
       location_id: item.locationId,
-      price: item.price,
+      price: item.price ? this.monetaryValue(item.price) : undefined,
       quantity: item.quantity
     })) : []
   }
@@ -272,5 +272,9 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       event: eventName,
       ecommerce: payload,
     });
+  }
+
+  protected monetaryValue(value: number): number {
+    return Math.round((value + Number.EPSILON) * 100) / 100
   }
 }
