@@ -162,4 +162,5 @@ export interface TrackifyGlobals {
   affiliation: string | null,
   currency: CurrencyCode | null;
   brand: string | null;
+  language: string | null;
 }

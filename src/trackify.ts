@@ -16,6 +16,7 @@ export class Trackify {
     affiliation: null,
     currency: null,
     brand: null,
+    language: null,
   };
   protected drivers: Map<AnalyticsDriverToken, AnalyticsDriver> = new Map<AnalyticsDriverToken, AnalyticsDriver>();
   protected driversResolved = false;

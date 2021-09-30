@@ -65,3 +65,10 @@ export interface ViewItemListConfig extends AnalyticsEventConfig {
   listName: string,
   items: Array<Item>
 }
+
+export interface PageViewConfig extends AnalyticsEventConfig {
+  pagePath: string,
+  pageTitle: string,
+  language: string,
+  currency?: CurrencyCode
+}

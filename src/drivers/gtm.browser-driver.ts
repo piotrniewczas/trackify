@@ -4,7 +4,7 @@ import {
   AddPaymentInfoConfig,
   AddShippingInfoConfig,
   AddToCartConfig,
-  BeginCheckoutConfig,
+  BeginCheckoutConfig, PageViewConfig,
   PurchaseConfig,
   RemoveFromCartConfig,
   ViewCartConfig,
@@ -44,7 +44,8 @@ export interface GTMItem extends Record<string, unknown> {
 }
 
 export type SupportedEventData =
-  AddPaymentInfoConfig
+  PageViewConfig
+  | AddPaymentInfoConfig
   | AddShippingInfoConfig
   | AddToCartConfig
   | BeginCheckoutConfig
@@ -58,7 +59,7 @@ export type SupportedEvent = AnalyticsEvent<SupportedEventData> | CustomAnalytic
 export default class GTMBrowserDriver implements AnalyticsDriver {
   protected name = 'GTMBrowserDriver';
 
-  public static SUPPORTED_EVENTS = ['add_payment_info', 'add_shipping_info', 'add_to_cart', 'begin_checkout', 'purchase', 'remove_from_cart', 'view_cart', 'view_item', 'view_item_list'];
+  public static SUPPORTED_EVENTS = ['page_view', 'add_payment_info', 'add_shipping_info', 'add_to_cart', 'begin_checkout', 'purchase', 'remove_from_cart', 'view_cart', 'view_item', 'view_item_list'];
 
   protected layerId = 'dataLayer';
 
@@ -86,6 +87,8 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
     const data = event.getData();
 
     switch (event.name) {
+      case 'page_view':
+        return await this.trackPageView(data as PageViewConfig);
       case 'add_payment_info':
         return await this.trackAddPaymentInfo(data as AddPaymentInfoConfig);
       case 'add_shipping_info':
@@ -121,7 +124,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       payload: {}
     };
 
-    const supportedTypes = ['ecommerce'];
+    const supportedTypes = ['ecommerce', 'common'];
     if (typeof data.event_type !== 'string' || !supportedTypes.includes(data.event_type)) {
       throw new TypeError(`Custom event ${event.name} has to provide event type for ${this.name} [forDriver.event_type]. Supported types: ${supportedTypes.join(', ')}`);
     }
@@ -143,9 +146,20 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
     switch (ev.type) {
       case 'ecommerce':
         return this.pushEcommerce(ev.name, ev.payload);
+      case 'common':
+        return this.pushCommon(ev.name, ev.payload);
       default:
         throw new TypeError(`Custom event ${event.name} not supported!`);
     }
+  }
+
+  protected async trackPageView(data: PageViewConfig): Promise<void> {
+    this.pushCommon('page_view', {
+      page_path: data.pagePath,
+      page_title: data.pageTitle,
+      language: data.language,
+      currency: data.currency,
+    });
   }
 
   protected async trackAddPaymentInfo(data: AddPaymentInfoConfig): Promise<void> {
@@ -249,8 +263,8 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       affiliation: item.affiliation,
       coupon: item.coupon,
       currency: item.currency,
-      discount: item.discount ? this.monetaryValue(item.discount) : undefined,
-      index: typeof item.index === 'undefined' ? iteration + 1 : item.index + indexAdjuster,
+      discount: item.discount ? this.monetaryValue(item.discount as number) : undefined,
+      index: typeof item.index === 'undefined' ? iteration + 1 : (item.index as number) + indexAdjuster,
       item_brand: item.brand,
       item_category: item.category,
       item_category2: item.category2,
@@ -261,10 +275,12 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       item_list_name: item.listName,
       item_variant: item.variant,
       location_id: item.locationId,
-      price: item.price ? this.monetaryValue(item.price) : undefined,
+      price: item.price ? this.monetaryValue(item.price as number) : undefined,
       quantity: item.quantity
     })) : [];
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     return items.map((item: GTMItem) => {
       for (const key in defaults) {
         if (typeof item[key] === 'undefined' || item[key] === null) {
@@ -282,6 +298,13 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       event: eventName,
       ecommerce: payload,
     });
+  }
+
+  protected pushCommon(eventName: string, payload: Record<string, string | number | CurrencyCode | undefined>): void {
+    (window[this.layerId] as Array<unknown>).push({
+      event: eventName,
+      ...payload
+    })
   }
 
   protected monetaryValue(value: number): number {
