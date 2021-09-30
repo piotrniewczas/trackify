@@ -21,7 +21,7 @@ declare global {
   }
 }
 
-export interface GTMItem {
+export interface GTMItem extends Record<string, unknown> {
   item_id: string,
   item_name: string,
   affiliation: string | undefined,
@@ -233,7 +233,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
     });
   }
 
-  protected getItems(data: SupportedEventData, defaults: Record<string, unknown> = {}): Array<GTMItem> {
+  protected getItems(data: SupportedEventData, defaults: Partial<GTMItem> = {}): Array<GTMItem> {
     let indexAdjuster = 0;
     if (Array.isArray(data.items) &&
       data.items[0] &&
@@ -243,7 +243,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       indexAdjuster = 1;
     }
 
-    return Array.isArray(data.items) ? data.items.map((item, iteration) => Object.assign(defaults, {
+    const items = Array.isArray(data.items) ? data.items.map((item, iteration) => ({
       item_id: item.id,
       item_name: item.name,
       affiliation: item.affiliation,
@@ -263,7 +263,17 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       location_id: item.locationId,
       price: item.price ? this.monetaryValue(item.price) : undefined,
       quantity: item.quantity
-    })) : []
+    })) : [];
+
+    return items.map((item: GTMItem) => {
+      for (const key in defaults) {
+        if (typeof item[key] === 'undefined' || item[key] === null) {
+          item[key] = defaults[key];
+        }
+      }
+
+      return item;
+    });
   }
 
   protected pushEcommerce(eventName: string, payload: Record<string, string | number | CurrencyCode | Array<GTMItem> | undefined>): void {
