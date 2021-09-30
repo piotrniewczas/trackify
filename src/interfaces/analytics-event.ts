@@ -9,3 +9,7 @@ export interface AnalyticsEvent<T> {
 
   setGlobals(globals: TrackifyGlobals): void;
 }
+
+export interface CustomAnalyticsEvent<T> extends AnalyticsEvent<T> {
+  forDriver(driverName: string): Record<string, unknown> | null;
+}

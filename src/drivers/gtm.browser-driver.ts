@@ -1,5 +1,5 @@
 import {AnalyticsDriver, AnalyticsDriverConfig} from "../interfaces/analytics-driver";
-import {AnalyticsEvent} from "../interfaces/analytics-event";
+import {AnalyticsEvent, CustomAnalyticsEvent} from "../interfaces/analytics-event";
 import {
   AddPaymentInfoConfig,
   AddShippingInfoConfig,
@@ -12,6 +12,7 @@ import {
   ViewItemListConfig
 } from "../interfaces/events/config";
 import {CurrencyCode} from "../interfaces/trackify-globals";
+import {isCustomEvent} from "../helpers/fns";
 
 declare global {
   interface Window {
@@ -52,9 +53,11 @@ export type SupportedEventData =
   | ViewCartConfig
   | ViewItemConfig
   | ViewItemListConfig;
-export type SupportedEvent = AnalyticsEvent<SupportedEventData>;
+export type SupportedEvent = AnalyticsEvent<SupportedEventData> | CustomAnalyticsEvent<unknown>;
 
 export default class GTMBrowserDriver implements AnalyticsDriver {
+  protected name = 'GTMBrowserDriver';
+
   public static SUPPORTED_EVENTS = ['add_payment_info', 'add_shipping_info', 'add_to_cart', 'begin_checkout', 'purchase', 'remove_from_cart', 'view_cart', 'view_item', 'view_item_list'];
 
   protected layerId = 'dataLayer';
@@ -76,6 +79,10 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   }
 
   public async track(event: SupportedEvent): Promise<void> {
+    if (isCustomEvent(event)) {
+      return await this.trackCustom(event);
+    }
+
     const data = event.getData();
 
     switch (event.name) {
@@ -102,8 +109,47 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
     }
   }
 
+  protected async trackCustom(event: CustomAnalyticsEvent<unknown>): Promise<void> {
+    const data = event.forDriver(this.name);
+    if (data === null) {
+      return;
+    }
+
+    const ev = {
+      type: '',
+      name: '',
+      payload: {}
+    };
+
+    const supportedTypes = ['ecommerce'];
+    if (typeof data.event_type !== 'string' || !supportedTypes.includes(data.event_type)) {
+      throw new TypeError(`Custom event ${event.name} has to provide event type for ${this.name} [forDriver.event_type]. Supported types: ${supportedTypes.join(', ')}`);
+    }
+
+    ev.type = data.event_type;
+
+    if (typeof data.event_name !== 'string') {
+      throw new TypeError(`Custom event ${event.name} has to provide event name for ${this.name} [forDriver.event_name]`);
+    }
+
+    ev.name = data.event_name;
+
+    if (data.event_payload === null || typeof data.event_payload !== 'object') {
+      throw new TypeError(`Custom event ${event.name} has to provide event payload for ${this.name} [forDriver.event_payload]`);
+    }
+
+    ev.payload = data.event_payload as Record<string, unknown>;
+
+    switch (ev.type) {
+      case 'ecommerce':
+        return this.pushEcommerce(ev.name, ev.payload);
+      default:
+        throw new TypeError(`Custom event ${event.name} not supported!`);
+    }
+  }
+
   protected async trackAddPaymentInfo(data: AddPaymentInfoConfig): Promise<void> {
-    this.push('add_payment_info', {
+    this.pushEcommerce('add_payment_info', {
       currency: data.currency,
       value: data.value,
       coupon: data.coupon,
@@ -113,7 +159,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   }
 
   protected async trackAddShippingInfo(data: AddShippingInfoConfig): Promise<void> {
-    this.push('add_shipping_info', {
+    this.pushEcommerce('add_shipping_info', {
       currency: data.currency,
       value: data.value,
       coupon: data.coupon,
@@ -123,7 +169,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   }
 
   protected async trackAddToCart(data: AddToCartConfig): Promise<void> {
-    this.push('add_to_cart', {
+    this.pushEcommerce('add_to_cart', {
       currency: data.currency,
       value: data.value,
       items: this.getItems(data),
@@ -131,7 +177,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   }
 
   protected async trackBeginCheckout(data: BeginCheckoutConfig): Promise<void> {
-    this.push('begin_checkout', {
+    this.pushEcommerce('begin_checkout', {
       currency: data.currency,
       value: data.value,
       coupon: data.coupon,
@@ -140,7 +186,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   }
 
   protected async trackPurchase(data: PurchaseConfig): Promise<void> {
-    this.push('purchase', {
+    this.pushEcommerce('purchase', {
       currency: data.currency,
       transaction_id: data.transactionId,
       value: data.value,
@@ -153,7 +199,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   }
 
   protected async trackRemoveFromCart(data: RemoveFromCartConfig): Promise<void> {
-    this.push('remove_from_cart', {
+    this.pushEcommerce('remove_from_cart', {
       currency: data.currency,
       value: data.value,
       items: this.getItems(data),
@@ -161,7 +207,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   }
 
   protected async trackViewCart(data: ViewCartConfig): Promise<void> {
-    this.push('view_cart', {
+    this.pushEcommerce('view_cart', {
       currency: data.currency,
       value: data.value,
       items: this.getItems(data),
@@ -169,7 +215,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   }
 
   protected async trackViewItem(data: ViewItemConfig): Promise<void> {
-    this.push('view_item', {
+    this.pushEcommerce('view_item', {
       currency: data.currency,
       value: data.value,
       items: this.getItems(data),
@@ -177,22 +223,34 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   }
 
   protected async trackViewItemList(data: ViewItemListConfig): Promise<void> {
-    this.push('view_item_list', {
+    this.pushEcommerce('view_item_list', {
       item_list_id: data.listId,
       item_list_name: data.listName,
-      items: this.getItems(data),
+      items: this.getItems(data, {
+        item_list_name: data.listName,
+        item_list_id: data.listId,
+      }),
     });
   }
 
-  protected getItems(data: SupportedEventData): Array<GTMItem> {
-    return Array.isArray(data.items) ? data.items.map(item => ({
+  protected getItems(data: SupportedEventData, defaults: Record<string, unknown> = {}): Array<GTMItem> {
+    let indexAdjuster = 0;
+    if (Array.isArray(data.items) &&
+      data.items[0] &&
+      typeof data.items[0].index !== 'undefined' &&
+      data.items[0].index !== null &&
+      data.items[0].index === 0) {
+      indexAdjuster = 1;
+    }
+
+    return Array.isArray(data.items) ? data.items.map((item, iteration) => Object.assign(defaults, {
       item_id: item.id,
       item_name: item.name,
       affiliation: item.affiliation,
       coupon: item.coupon,
       currency: item.currency,
       discount: item.discount,
-      index: item.index,
+      index: typeof item.index === 'undefined' ? iteration + 1 : item.index + indexAdjuster,
       item_brand: item.brand,
       item_category: item.category,
       item_category2: item.category2,
@@ -208,7 +266,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
     })) : []
   }
 
-  protected push(eventName: string, payload: Record<string, string | number | CurrencyCode | Array<GTMItem> | undefined>): void {
+  protected pushEcommerce(eventName: string, payload: Record<string, string | number | CurrencyCode | Array<GTMItem> | undefined>): void {
     (window[this.layerId] as Array<unknown>).push({ecommerce: null});
     (window[this.layerId] as Array<unknown>).push({
       event: eventName,
