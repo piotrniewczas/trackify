@@ -69,6 +69,6 @@ export interface ViewItemListConfig extends AnalyticsEventConfig {
 export interface PageViewConfig extends AnalyticsEventConfig {
   pagePath: string,
   pageTitle: string,
-  language: string,
+  language?: string,
   currency?: CurrencyCode
 }
