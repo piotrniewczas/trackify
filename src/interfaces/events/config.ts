@@ -31,6 +31,10 @@ export interface BeginCheckoutConfig extends AnalyticsEventConfig {
   items: Array<Item>
 }
 
+export interface LoginConfig extends AnalyticsEventConfig {
+  method: string
+}
+
 export interface PurchaseConfig extends AnalyticsEventConfig {
   currency?: CurrencyCode,
   transactionId: string,
@@ -46,6 +50,10 @@ export interface RemoveFromCartConfig extends AnalyticsEventConfig {
   currency?: CurrencyCode,
   value: number,
   items: Array<Item>
+}
+
+export interface SignUpConfig extends AnalyticsEventConfig {
+  method: string
 }
 
 export interface ViewCartConfig extends AnalyticsEventConfig {
