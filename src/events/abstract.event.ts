@@ -12,5 +12,13 @@ export abstract class AbstractEvent implements AnalyticsEventInterface<Analytics
 
   abstract getData(): AnalyticsEventConfig;
 
-  abstract setGlobals(globals: TrackifyGlobals): void;
+  setGlobals(globals: TrackifyGlobals): void {
+    if (globals.currency && !this.config.currency) {
+      this.config.currency = globals.currency;
+    }
+
+    if (globals.language && !this.config.language) {
+      this.config.language = globals.language;
+    }
+  }
 }

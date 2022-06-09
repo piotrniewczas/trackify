@@ -1,8 +1,8 @@
 import { AnalyticsEvent } from '../../interfaces/analytics-event'
-import { AbstractSalesEvent } from './abstract-sales.event'
+import { AbstractEvent } from '../abstract.event'
 import { SignUpConfig } from '../../interfaces/events/config'
 
-export class SignUpEvent extends AbstractSalesEvent implements AnalyticsEvent<SignUpConfig> {
+export class SignUpEvent extends AbstractEvent implements AnalyticsEvent<SignUpConfig> {
   name = 'sign_up'
 
   constructor (protected config: SignUpConfig) {

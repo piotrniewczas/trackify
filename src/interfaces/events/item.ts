@@ -5,7 +5,7 @@ export interface Item extends Record<string, string | number | undefined> {
   name: string,
   affiliation?: string,
   coupon?: string,
-  currency?: CurrencyCode,
+  currency?: keyof typeof CurrencyCode,
   discount?: number,
   index?: number,
   brand?: string,
@@ -20,4 +20,7 @@ export interface Item extends Record<string, string | number | undefined> {
   locationId?: string,
   price?: number,
   quantity?: number,
+  ean?: number;
+  url?: string;
+  image?: string;
 }

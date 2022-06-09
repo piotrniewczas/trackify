@@ -3,51 +3,66 @@ import {Item} from "./item";
 import {AnalyticsEventConfig} from "../analytics-event";
 
 export interface AddPaymentInfoConfig extends AnalyticsEventConfig {
-  currency?: CurrencyCode,
+  currency?: keyof typeof CurrencyCode,
   value: number,
   coupon?: string,
   paymentMethod?: string,
-  items: Array<Item>
+  items: Array<Item>,
+  customer?: {
+    firstname?: string;
+    lastname?: string;
+    email?: string;
+    telephone?: string;
+  }
 }
 
 export interface AddShippingInfoConfig extends AnalyticsEventConfig {
-  currency?: CurrencyCode,
+  currency?: keyof typeof CurrencyCode,
   value: number,
   coupon?: string,
   shippingTier?: string,
-  items: Array<Item>
+  items: Array<Item>,
 }
 
 export interface AddToCartConfig extends AnalyticsEventConfig {
-  currency?: CurrencyCode,
+  currency?: keyof typeof CurrencyCode,
   value: number,
   items: Array<Item>
 }
 
 export interface BeginCheckoutConfig extends AnalyticsEventConfig {
-  currency?: CurrencyCode,
+  currency?: keyof typeof CurrencyCode,
   value: number,
   coupon?: string,
   items: Array<Item>
 }
 
 export interface LoginConfig extends AnalyticsEventConfig {
-  method: string
+  method: string;
+  firstname?: string;
+  lastname?: string;
+  email?: string;
+  id?: string;
+  shop_id?: string;
 }
 
 export interface PurchaseConfig extends AnalyticsEventConfig {
-  currency?: CurrencyCode,
+  currency?: keyof typeof CurrencyCode,
   transactionId: string,
   value: number,
   affiliation?: string,
   coupon?: string,
   shipping?: number,
   tax?: number,
-  items: Array<Item>
+  items: Array<Item>,
+  discount?: number,
+  customer?: {
+    id?: string | number,
+  }
 }
 
 export interface RemoveFromCartConfig extends AnalyticsEventConfig {
-  currency?: CurrencyCode,
+  currency?: keyof typeof CurrencyCode,
   value: number,
   items: Array<Item>
 }
@@ -57,13 +72,13 @@ export interface SignUpConfig extends AnalyticsEventConfig {
 }
 
 export interface ViewCartConfig extends AnalyticsEventConfig {
-  currency?: CurrencyCode,
+  currency?: keyof typeof CurrencyCode,
   value: number,
   items: Array<Item>
 }
 
 export interface ViewItemConfig extends AnalyticsEventConfig {
-  currency?: CurrencyCode,
+  currency?: keyof typeof CurrencyCode,
   value: number,
   items: Array<Item>
 }
@@ -78,5 +93,5 @@ export interface PageViewConfig extends AnalyticsEventConfig {
   pagePath: string,
   pageTitle: string,
   language?: string,
-  currency?: CurrencyCode
+  currency?: keyof typeof CurrencyCode
 }

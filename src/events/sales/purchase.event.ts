@@ -19,6 +19,10 @@ export class PurchaseEvent extends AbstractSalesEvent implements AnalyticsEvent<
       shipping: this.config.shipping,
       tax: this.config.tax,
       items: Array.isArray(this.config.items) ? this.config.items.map(item => ({...item})) : [],
+      discount: this.config.discount,
+      customer: this.config.customer ? {
+        id: this.config.customer.id
+      } : undefined
     }
   }
 }

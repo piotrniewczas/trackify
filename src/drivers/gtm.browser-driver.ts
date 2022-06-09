@@ -4,9 +4,10 @@ import {
   AddPaymentInfoConfig,
   AddShippingInfoConfig,
   AddToCartConfig,
-  BeginCheckoutConfig, PageViewConfig,
+  BeginCheckoutConfig, LoginConfig,
+  PageViewConfig,
   PurchaseConfig,
-  RemoveFromCartConfig,
+  RemoveFromCartConfig, SignUpConfig,
   ViewCartConfig,
   ViewItemConfig,
   ViewItemListConfig
@@ -17,6 +18,7 @@ import {isCustomEvent} from "../helpers/fns";
 declare global {
   interface Window {
     dataLayer: Array<{ event?: string, ecommerce: Record<string, unknown> | null }>;
+
     [p: string]: unknown | Array<unknown>,
   }
 }
@@ -53,14 +55,14 @@ export type SupportedEventData =
   | RemoveFromCartConfig
   | ViewCartConfig
   | ViewItemConfig
-  | ViewItemListConfig;
+  | ViewItemListConfig
+  | LoginConfig
+  | SignUpConfig;
 export type SupportedEvent = AnalyticsEvent<SupportedEventData> | CustomAnalyticsEvent<unknown>;
 
 export default class GTMBrowserDriver implements AnalyticsDriver {
+  public static SUPPORTED_EVENTS = ['page_view', 'add_payment_info', 'add_shipping_info', 'add_to_cart', 'begin_checkout', 'purchase', 'remove_from_cart', 'view_cart', 'view_item', 'view_item_list', 'login', 'sign_up'];
   protected name = 'GTMBrowserDriver';
-
-  public static SUPPORTED_EVENTS = ['page_view', 'add_payment_info', 'add_shipping_info', 'add_to_cart', 'begin_checkout', 'purchase', 'remove_from_cart', 'view_cart', 'view_item', 'view_item_list'];
-
   protected layerId = 'dataLayer';
 
   constructor(config: AnalyticsDriverConfig) {
@@ -107,6 +109,10 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
         return await this.trackViewItem(data as ViewItemConfig);
       case 'view_item_list':
         return await this.trackViewItemList(data as ViewItemListConfig);
+      case 'login':
+        return await this.trackLogin(data as LoginConfig);
+      case 'sign_up':
+        return await this.trackSignUp(data as SignUpConfig);
       default:
         throw new TypeError(`Event ${event.name} not supported!`);
     }
@@ -292,7 +298,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
     });
   }
 
-  protected pushEcommerce(eventName: string, payload: Record<string, string | number | CurrencyCode | Array<GTMItem> | undefined>): void {
+  protected pushEcommerce(eventName: string, payload: Record<string, string | number | keyof typeof CurrencyCode | Array<GTMItem> | undefined>): void {
     (window[this.layerId] as Array<unknown>).push({ecommerce: null});
     (window[this.layerId] as Array<unknown>).push({
       event: eventName,
@@ -300,7 +306,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
     });
   }
 
-  protected pushCommon(eventName: string, payload: Record<string, string | number | CurrencyCode | undefined>): void {
+  protected pushCommon(eventName: string, payload: Record<string, string | number | keyof typeof CurrencyCode | undefined>): void {
     (window[this.layerId] as Array<unknown>).push({
       event: eventName,
       ...payload
@@ -309,5 +315,17 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
 
   protected monetaryValue(value: number): number {
     return Math.round((value + Number.EPSILON) * 100) / 100
+  }
+
+  private async trackLogin(data: LoginConfig): Promise<void> {
+    this.pushCommon('login', {
+      method: data.method
+    })
+  }
+
+  private async trackSignUp(data: SignUpConfig): Promise<void> {
+    this.pushCommon('sign_up', {
+      method: data.method
+    })
   }
 }

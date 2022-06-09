@@ -16,6 +16,12 @@ export class AddPaymentInfoEvent extends AbstractSalesEvent implements Analytics
       coupon: this.config.coupon,
       paymentMethod: this.config.paymentMethod,
       items: Array.isArray(this.config.items) ? this.config.items.map(item => ({...item})) : [],
+      customer: this.config.customer ? {
+        firstname: this.config.customer?.firstname,
+        lastname: this.config.customer?.lastname,
+        email: this.config.customer?.email,
+        telephone: this.config.customer?.telephone
+      } : undefined
     };
   }
 }
