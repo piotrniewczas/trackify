@@ -1,6 +1,6 @@
 {
   "name": "@kluseg/trackify",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "All-in-one solution for integrating analytics with your app.",
   "author": "Adrian Kluska <a.kluska98@gmail.com>",
   "repository": "https://github.com/KluseG/trackify",
@@ -25,7 +25,7 @@
     "clean": "rm -rf dist build package",
     "ts-node": "ts-node",
     "docs": "typedoc --entryPoints src/main.ts",
-    "build": "esbuild src/*.ts src/**/*.ts --minify --sourcemap=external --outdir=dist && tsc --emitDeclarationOnly",
+    "build": "esbuild `find ./src \\( -name '*.ts' ! -name 'browser.ts' \\)` --minify --sourcemap=external --outdir=dist && tsc --emitDeclarationOnly",
     "build-all": "yarn clean && yarn build && yarn esbuild-browser",
     "esbuild-browser": "esbuild src/browser.ts --bundle --minify --sourcemap=external --outfile=dist/browser/index.js",
     "esbuild-browser:dev": "esbuild src/browser.ts --bundle --outfile=dist/esbuild/browser.js",
