@@ -2,7 +2,7 @@
   <head>
     <title>Browser test</title>
     <meta charset="UTF-8">
-    <script src="./dist/esbuild/browser.js"></script>
+    <script src="./dist/browser"></script>
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
         new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -65,7 +65,7 @@
       }
 
       function viewItemList() {
-        const event = new Trackify.Events.Sales.ViewItemListEvent({
+        const event = new Trackify.Events.ViewItemListEvent({
           listId: 'homepage',
           listName: 'Home page',
           items: [
@@ -79,7 +79,7 @@
 
       function viewItem(id) {
         const item = items[id];
-        const event = new Trackify.Events.Sales.ViewItemEvent({
+        const event = new Trackify.Events.ViewItemEvent({
           value: item.price,
           items: [
             item
@@ -91,7 +91,7 @@
 
       function addToCart(id, quantity = 1) {
         const item = { ...items[id], quantity };
-        const event = new Trackify.Events.Sales.AddToCartEvent({
+        const event = new Trackify.Events.AddToCartEvent({
           value: item.price * quantity,
           items: [
             item
@@ -105,7 +105,7 @@
         cartItems = cartItems.map(([id, quantity], index) => {
           return { ...items[id], quantity, index};
         });
-        const event = new Trackify.Events.Sales.ViewCartEvent({
+        const event = new Trackify.Events.ViewCartEvent({
           value: cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0),
           items: cartItems
         });
@@ -115,7 +115,7 @@
 
       function removeFromCart(id, quantity = 1) {
         const item = { ...items[id], quantity };
-        const event = new Trackify.Events.Sales.RemoveFromCartEvent({
+        const event = new Trackify.Events.RemoveFromCartEvent({
           value: item.price * quantity,
           items: [
             item
@@ -129,7 +129,7 @@
         cartItems = cartItems.map(([id, quantity], index) => {
           return { ...items[id], quantity, index};
         });
-        const event = new Trackify.Events.Sales.AddShippingInfoEvent({
+        const event = new Trackify.Events.AddShippingInfoEvent({
           value: 15,
           shippingMethod: 'inpost_kurier',
           items: cartItems
@@ -142,7 +142,7 @@
         cartItems = cartItems.map(([id, quantity], index) => {
           return { ...items[id], quantity, index};
         });
-        const event = new Trackify.Events.Sales.AddPaymentInfoEvent({
+        const event = new Trackify.Events.AddPaymentInfoEvent({
           value: cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0),
           paymentMethod: 'blik_pbl',
           items: cartItems
@@ -155,7 +155,7 @@
         cartItems = cartItems.map(([id, quantity], index) => {
           return { ...items[id], quantity, index, coupon: 'COUPON_TEST', discount: 15.00};
         });
-        const event = new Trackify.Events.Sales.BeginCheckoutEvent({
+        const event = new Trackify.Events.BeginCheckoutEvent({
           value: cartItems.reduce((acc, item) => acc + ((item.price - item.discount) * item.quantity), 0),
           coupon: 'COUPON_TEST',
           items: cartItems
@@ -168,7 +168,7 @@
         cartItems = cartItems.map(([id, quantity], index) => {
           return { ...items[id], quantity, index, coupon: 'COUPON_TEST', discount: 15.00};
         });
-        const event = new Trackify.Events.Sales.PurchaseEvent({
+        const event = new Trackify.Events.PurchaseEvent({
           transactionId: 'TRANS-000',
           value: cartItems.reduce((acc, item) => acc + ((item.price - item.discount) * item.quantity), 0),
           coupon: 'COUPON_TEST',
