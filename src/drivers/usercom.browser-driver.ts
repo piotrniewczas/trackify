@@ -8,7 +8,7 @@ import {
   LoginConfig,
   PageViewConfig,
   PurchaseConfig,
-  ViewItemConfig
+  ViewItemConfig, ViewItemListConfig
 } from "../interfaces/events/config";
 
 declare global {
@@ -19,7 +19,7 @@ declare global {
 }
 
 export default class UsercomBrowserDriver implements AnalyticsDriver {
-  public static SUPPORTED_EVENTS = ['page_view', 'add_payment_info', 'add_to_cart', 'purchase', 'view_item', 'login'];
+  public static SUPPORTED_EVENTS = ['page_view', 'add_payment_info', 'add_to_cart', 'purchase', 'view_item', 'view_item_list', 'login'];
   public static AVAILABILITY_CHECK_TIMEOUT = 250;
   public static AVAILABILITY_CHECK_MAX_TIMEOUT = 1500;
   protected name = 'UsercomBrowserDriver';
@@ -56,6 +56,8 @@ export default class UsercomBrowserDriver implements AnalyticsDriver {
         return await this.trackPurchase(data as PurchaseConfig);
       case 'view_item':
         return await this.trackViewItem(data as ViewItemConfig);
+      case 'view_item_list':
+        return await this.trackViewItemList(data as ViewItemListConfig);
       case 'login':
         return await this.trackLogin(data as LoginConfig);
       default:
@@ -196,6 +198,29 @@ export default class UsercomBrowserDriver implements AnalyticsDriver {
   }
 
   private async trackViewItem(data: ViewItemConfig): Promise<void> {
+    data.items.forEach(item => {
+      this.push('product_event', {
+        event_type: 'view',
+        list: item.listId,
+        product_id: item.sku,
+        name: item.name,
+        brand: item.brand,
+        sku: item.sku,
+        ean: item.ean,
+        category: [item.category, item.category2, item.category3, item.category4, item.category5].filter(c => typeof c === 'string' && c.length).join(' > '),
+        variant: item.variant,
+        price: item.price ? this.monetaryValue(item.price as number) : undefined,
+        value: item.price ? this.monetaryValue(item.price as number) : undefined,
+        quantity: typeof item.qty !== 'undefined' ? item.qty : 1,
+        currency: item.currency,
+        position: item.index,
+        url: item.url,
+        image_url: item.image,
+      })
+    });
+  }
+
+  private async trackViewItemList(data: ViewItemListConfig): Promise<void> {
     data.items.forEach(item => {
       this.push('product_event', {
         event_type: 'view',
