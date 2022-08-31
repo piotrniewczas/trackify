@@ -1,19 +1,20 @@
-import {AnalyticsDriver, AnalyticsDriverConfig} from "../interfaces/analytics-driver";
-import {AnalyticsEvent, CustomAnalyticsEvent} from "../interfaces/analytics-event";
+import { AnalyticsDriver, AnalyticsDriverConfig } from '../interfaces/analytics-driver'
+import { AnalyticsEvent, CustomAnalyticsEvent } from '../interfaces/analytics-event'
 import {
   AddPaymentInfoConfig,
   AddShippingInfoConfig,
   AddToCartConfig,
-  BeginCheckoutConfig, LoginConfig,
+  BeginCheckoutConfig,
+  LoginConfig,
   PageViewConfig,
   PurchaseConfig,
   RemoveFromCartConfig, SignUpConfig,
   ViewCartConfig,
   ViewItemConfig,
   ViewItemListConfig
-} from "../interfaces/events/config";
-import {CurrencyCode} from "../interfaces/trackify-globals";
-import {isCustomEvent} from "../helpers/fns";
+} from '../interfaces/events/config'
+import { CurrencyCode } from '../interfaces/trackify-globals'
+import { isCustomEvent } from '../helpers/fns'
 
 declare global {
   interface Window {
@@ -61,151 +62,165 @@ export type SupportedEventData =
 export type SupportedEvent = AnalyticsEvent<SupportedEventData> | CustomAnalyticsEvent<unknown>;
 
 export default class GTMBrowserDriver implements AnalyticsDriver {
-  public static SUPPORTED_EVENTS = ['page_view', 'add_payment_info', 'add_shipping_info', 'add_to_cart', 'begin_checkout', 'purchase', 'remove_from_cart', 'view_cart', 'view_item', 'view_item_list', 'login', 'sign_up'];
-  protected name = 'GTMBrowserDriver';
-  protected layerId = 'dataLayer';
+  public static SUPPORTED_EVENTS = [
+    'page_view',
+    'add_payment_info',
+    'add_shipping_info',
+    'add_to_cart',
+    'begin_checkout',
+    'purchase',
+    'remove_from_cart',
+    'view_cart',
+    'view_item',
+    'view_item_list',
+    'login',
+    'sign_up'
+  ]
+  protected name = 'GTMBrowserDriver'
+  protected layerId = 'dataLayer'
 
-  constructor(config: AnalyticsDriverConfig) {
+  constructor (config: AnalyticsDriverConfig) {
     if (config && config.layerId) {
-      this.layerId = config.layerId as string;
+      this.layerId = config.layerId as string
     }
   }
 
-  public async load(): Promise<boolean> {
-    window[this.layerId] = window[this.layerId] || [];
+  public async load (): Promise<boolean> {
+    window[this.layerId] = window[this.layerId] || []
 
-    return Object.prototype.hasOwnProperty.call(window, this.layerId);
+    return Object.prototype.hasOwnProperty.call(window, this.layerId)
   }
 
-  public supportsEvent(event: AnalyticsEvent<unknown>): boolean {
-    return GTMBrowserDriver.SUPPORTED_EVENTS.includes(event.name);
+  public supportsEvent (event: AnalyticsEvent<unknown>): boolean {
+    return GTMBrowserDriver.SUPPORTED_EVENTS.includes(event.name)
   }
 
-  public async track(event: SupportedEvent): Promise<void> {
+  public async track (event: SupportedEvent): Promise<void> {
     if (isCustomEvent(event)) {
-      return await this.trackCustom(event);
+      return await this.trackCustom(event)
     }
 
-    const data = event.getData();
+    const data = event.getData()
 
     switch (event.name) {
       case 'page_view':
-        return await this.trackPageView(data as PageViewConfig);
+        return await this.trackPageView(data as PageViewConfig)
       case 'add_payment_info':
-        return await this.trackAddPaymentInfo(data as AddPaymentInfoConfig);
+        return await this.trackAddPaymentInfo(data as AddPaymentInfoConfig)
       case 'add_shipping_info':
-        return await this.trackAddShippingInfo(data as AddShippingInfoConfig);
+        return await this.trackAddShippingInfo(data as AddShippingInfoConfig)
       case 'add_to_cart':
-        return await this.trackAddToCart(data as AddToCartConfig);
+        return await this.trackAddToCart(data as AddToCartConfig)
       case 'begin_checkout':
-        return await this.trackBeginCheckout(data as BeginCheckoutConfig);
+        return await this.trackBeginCheckout(data as BeginCheckoutConfig)
       case 'purchase':
-        return await this.trackPurchase(data as PurchaseConfig);
+        return await this.trackPurchase(data as PurchaseConfig)
       case 'remove_from_cart':
-        return await this.trackRemoveFromCart(data as RemoveFromCartConfig);
+        return await this.trackRemoveFromCart(data as RemoveFromCartConfig)
       case 'view_cart':
-        return await this.trackViewCart(data as ViewCartConfig);
+        return await this.trackViewCart(data as ViewCartConfig)
       case 'view_item':
-        return await this.trackViewItem(data as ViewItemConfig);
+        return await this.trackViewItem(data as ViewItemConfig)
       case 'view_item_list':
-        return await this.trackViewItemList(data as ViewItemListConfig);
+        return await this.trackViewItemList(data as ViewItemListConfig)
       case 'login':
-        return await this.trackLogin(data as LoginConfig);
+        return await this.trackLogin(data as LoginConfig)
       case 'sign_up':
-        return await this.trackSignUp(data as SignUpConfig);
+        return await this.trackSignUp(data as SignUpConfig)
       default:
-        throw new TypeError(`Event ${event.name} not supported!`);
+        throw new TypeError(`Event ${event.name} not supported!`)
     }
   }
 
-  protected async trackCustom(event: CustomAnalyticsEvent<unknown>): Promise<void> {
-    const data = event.forDriver(this.name);
+  protected async trackCustom (event: CustomAnalyticsEvent<unknown>): Promise<void> {
+    const data = event.forDriver(this.name)
     if (data === null) {
-      return;
+      return
     }
 
     const ev = {
       type: '',
       name: '',
       payload: {}
-    };
-
-    const supportedTypes = ['ecommerce', 'common'];
-    if (typeof data.event_type !== 'string' || !supportedTypes.includes(data.event_type)) {
-      throw new TypeError(`Custom event ${event.name} has to provide event type for ${this.name} [forDriver.event_type]. Supported types: ${supportedTypes.join(', ')}`);
     }
 
-    ev.type = data.event_type;
+    const supportedTypes = ['ecommerce', 'common']
+    if (typeof data.event_type !== 'string' || !supportedTypes.includes(data.event_type)) {
+      throw new TypeError(`Custom event ${event.name} has to provide event type for ${this.name} [forDriver.event_type]. Supported types: ${supportedTypes.join(
+        ', ')}`)
+    }
+
+    ev.type = data.event_type
 
     if (typeof data.event_name !== 'string') {
-      throw new TypeError(`Custom event ${event.name} has to provide event name for ${this.name} [forDriver.event_name]`);
+      throw new TypeError(`Custom event ${event.name} has to provide event name for ${this.name} [forDriver.event_name]`)
     }
 
-    ev.name = data.event_name;
+    ev.name = data.event_name
 
     if (data.event_payload === null || typeof data.event_payload !== 'object') {
-      throw new TypeError(`Custom event ${event.name} has to provide event payload for ${this.name} [forDriver.event_payload]`);
+      throw new TypeError(`Custom event ${event.name} has to provide event payload for ${this.name} [forDriver.event_payload]`)
     }
 
-    ev.payload = data.event_payload as Record<string, unknown>;
+    ev.payload = data.event_payload as Record<string, unknown>
 
     switch (ev.type) {
       case 'ecommerce':
-        return this.pushEcommerce(ev.name, ev.payload);
+        return this.pushEcommerce(ev.name, ev.payload)
       case 'common':
-        return this.pushCommon(ev.name, ev.payload);
+        return this.pushCommon(ev.name, ev.payload)
       default:
-        throw new TypeError(`Custom event ${event.name} not supported!`);
+        throw new TypeError(`Custom event ${event.name} not supported!`)
     }
   }
 
-  protected async trackPageView(data: PageViewConfig): Promise<void> {
+  protected async trackPageView (data: PageViewConfig): Promise<void> {
     this.pushCommon('page_view', {
       page_path: data.pagePath,
       page_title: data.pageTitle,
       language: data.language,
-      currency: data.currency,
-    });
+      currency: data.currency
+    })
   }
 
-  protected async trackAddPaymentInfo(data: AddPaymentInfoConfig): Promise<void> {
+  protected async trackAddPaymentInfo (data: AddPaymentInfoConfig): Promise<void> {
     this.pushEcommerce('add_payment_info', {
       currency: data.currency,
       value: this.monetaryValue(data.value),
       coupon: data.coupon,
       payment_type: data.paymentMethod,
-      items: this.getItems(data),
-    });
+      items: this.getItems(data)
+    })
   }
 
-  protected async trackAddShippingInfo(data: AddShippingInfoConfig): Promise<void> {
+  protected async trackAddShippingInfo (data: AddShippingInfoConfig): Promise<void> {
     this.pushEcommerce('add_shipping_info', {
       currency: data.currency,
       value: this.monetaryValue(data.value),
       coupon: data.coupon,
       shipping_tier: data.shippingTier,
-      items: this.getItems(data),
-    });
+      items: this.getItems(data)
+    })
   }
 
-  protected async trackAddToCart(data: AddToCartConfig): Promise<void> {
+  protected async trackAddToCart (data: AddToCartConfig): Promise<void> {
     this.pushEcommerce('add_to_cart', {
       currency: data.currency,
       value: this.monetaryValue(data.value),
-      items: this.getItems(data),
-    });
+      items: this.getItems(data)
+    })
   }
 
-  protected async trackBeginCheckout(data: BeginCheckoutConfig): Promise<void> {
+  protected async trackBeginCheckout (data: BeginCheckoutConfig): Promise<void> {
     this.pushEcommerce('begin_checkout', {
       currency: data.currency,
       value: this.monetaryValue(data.value),
       coupon: data.coupon,
-      items: this.getItems(data),
-    });
+      items: this.getItems(data)
+    })
   }
 
-  protected async trackPurchase(data: PurchaseConfig): Promise<void> {
+  protected async trackPurchase (data: PurchaseConfig): Promise<void> {
     this.pushEcommerce('purchase', {
       currency: data.currency,
       transaction_id: data.transactionId,
@@ -214,53 +229,53 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       coupon: data.coupon,
       shipping: data.shipping ? this.monetaryValue(data.shipping) : undefined,
       tax: data.tax ? this.monetaryValue(data.tax) : undefined,
-      items: this.getItems(data),
-    });
+      items: this.getItems(data)
+    })
   }
 
-  protected async trackRemoveFromCart(data: RemoveFromCartConfig): Promise<void> {
+  protected async trackRemoveFromCart (data: RemoveFromCartConfig): Promise<void> {
     this.pushEcommerce('remove_from_cart', {
       currency: data.currency,
       value: this.monetaryValue(data.value),
-      items: this.getItems(data),
-    });
+      items: this.getItems(data)
+    })
   }
 
-  protected async trackViewCart(data: ViewCartConfig): Promise<void> {
+  protected async trackViewCart (data: ViewCartConfig): Promise<void> {
     this.pushEcommerce('view_cart', {
       currency: data.currency,
       value: this.monetaryValue(data.value),
-      items: this.getItems(data),
-    });
+      items: this.getItems(data)
+    })
   }
 
-  protected async trackViewItem(data: ViewItemConfig): Promise<void> {
+  protected async trackViewItem (data: ViewItemConfig): Promise<void> {
     this.pushEcommerce('view_item', {
       currency: data.currency,
       value: this.monetaryValue(data.value),
-      items: this.getItems(data),
-    });
+      items: this.getItems(data)
+    })
   }
 
-  protected async trackViewItemList(data: ViewItemListConfig): Promise<void> {
+  protected async trackViewItemList (data: ViewItemListConfig): Promise<void> {
     this.pushEcommerce('view_item_list', {
       item_list_id: data.listId,
       item_list_name: data.listName,
       items: this.getItems(data, {
         item_list_name: data.listName,
-        item_list_id: data.listId,
-      }),
-    });
+        item_list_id: data.listId
+      })
+    })
   }
 
-  protected getItems(data: SupportedEventData, defaults: Partial<GTMItem> = {}): Array<GTMItem> {
-    let indexAdjuster = 0;
+  protected getItems (data: SupportedEventData, defaults: Partial<GTMItem> = {}): Array<GTMItem> {
+    let indexAdjuster = 0
     if (Array.isArray(data.items) &&
       data.items[0] &&
       typeof data.items[0].index !== 'undefined' &&
       data.items[0].index !== null &&
       data.items[0].index === 0) {
-      indexAdjuster = 1;
+      indexAdjuster = 1
     }
 
     const items = Array.isArray(data.items) ? data.items.map((item, iteration) => ({
@@ -283,47 +298,53 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       location_id: item.locationId,
       price: item.price ? this.monetaryValue(item.price as number) : undefined,
       quantity: item.quantity
-    })) : [];
+    })) : []
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return items.map((item: GTMItem) => {
       for (const key in defaults) {
         if (typeof item[key] === 'undefined' || item[key] === null) {
-          item[key] = defaults[key];
+          item[key] = defaults[key]
         }
       }
 
-      return item;
-    });
+      return item
+    })
   }
 
-  protected pushEcommerce(eventName: string, payload: Record<string, string | number | keyof typeof CurrencyCode | Array<GTMItem> | undefined>): void {
-    (window[this.layerId] as Array<unknown>).push({ecommerce: null});
+  protected pushEcommerce (
+    eventName: string,
+    payload: Record<string, string | number | keyof typeof CurrencyCode | Array<GTMItem> | undefined>
+  ): void {
+    (window[this.layerId] as Array<unknown>).push({ ecommerce: null });
     (window[this.layerId] as Array<unknown>).push({
       event: eventName,
-      ecommerce: payload,
-    });
+      ecommerce: payload
+    })
   }
 
-  protected pushCommon(eventName: string, payload: Record<string, string | number | keyof typeof CurrencyCode | undefined>): void {
+  protected pushCommon (
+    eventName: string,
+    payload: Record<string, string | number | keyof typeof CurrencyCode | undefined>
+  ): void {
     (window[this.layerId] as Array<unknown>).push({
       event: eventName,
       ...payload
     })
   }
 
-  protected monetaryValue(value: number): number {
+  protected monetaryValue (value: number): number {
     return Math.round((value + Number.EPSILON) * 100) / 100
   }
 
-  private async trackLogin(data: LoginConfig): Promise<void> {
+  private async trackLogin (data: LoginConfig): Promise<void> {
     this.pushCommon('login', {
       method: data.method
     })
   }
 
-  private async trackSignUp(data: SignUpConfig): Promise<void> {
+  private async trackSignUp (data: SignUpConfig): Promise<void> {
     this.pushCommon('sign_up', {
       method: data.method
     })
