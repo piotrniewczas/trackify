@@ -1,6 +1,6 @@
-import {CurrencyCode} from "../trackify-globals";
-import {Item} from "./item";
-import {AnalyticsEventConfig} from "../analytics-event";
+import { CurrencyCode } from '../trackify-globals'
+import { Item } from './item'
+import { AnalyticsEventConfig } from '../analytics-event'
 
 export interface AddPaymentInfoConfig extends AnalyticsEventConfig {
   currency?: keyof typeof CurrencyCode,
@@ -38,6 +38,10 @@ export interface BeginCheckoutConfig extends AnalyticsEventConfig {
 }
 
 export interface LoginConfig extends AnalyticsEventConfig {
+  method: string;
+}
+
+export interface SignUpConfig extends AnalyticsEventConfig {
   method: string;
   firstname?: string;
   lastname?: string;
