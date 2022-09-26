@@ -14,7 +14,8 @@ export class PageViewEvent extends AbstractEvent implements AnalyticsEvent<PageV
       pagePath: this.config.pagePath,
       pageTitle: this.config.pageTitle,
       language: this.config.language,
-      currency: this.config.currency
+      currency: this.config.currency,
+      turnOffPageViewForSPA: this.config.turnOffPageViewForSPA
     }
   }
 }
