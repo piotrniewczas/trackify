@@ -97,5 +97,6 @@ export interface PageViewConfig extends AnalyticsEventConfig {
   pagePath: string,
   pageTitle: string,
   language?: string,
-  currency?: keyof typeof CurrencyCode
+  currency?: keyof typeof CurrencyCode,
+  turnOffPageViewForSPA: number
 }

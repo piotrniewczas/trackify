@@ -104,6 +104,9 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
 
     switch (event.name) {
       case 'page_view':
+        if ((data as PageViewConfig).turnOffPageViewForSPA === 1) {
+          return
+        }
         return await this.trackPageView(data as PageViewConfig)
       case 'add_payment_info':
         return await this.trackAddPaymentInfo(data as AddPaymentInfoConfig)
