@@ -1,4 +1,5 @@
-export * from './tokens'
-export * from './trackify'
-export * from './events'
-export * from './interfaces/events/config'
+import * as Tokens from './tokens';
+
+export * from './trackify';
+export * from './events';
+export const TOKENS = Tokens;

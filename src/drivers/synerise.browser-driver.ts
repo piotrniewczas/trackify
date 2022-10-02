@@ -15,9 +15,7 @@ declare global {
   interface Window {
     SR?: {
       event: {
-        pageVisit: (
-          payload: Record<string, string>
-        ) => void,
+        pageVisit: () => void,
         trackCustomEvent: (
           eventName: string,
           payload: Record<string, string | number | keyof typeof CurrencyCode | undefined> | undefined,
@@ -46,6 +44,7 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
 
   public async load (): Promise<boolean> {
     try {
+      this.reportDebug('[Synerise] Load')
       await this.checkIfLoaded()
 
       return true
@@ -54,16 +53,24 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
     }
   }
 
+  protected reportDebug (_error: unknown): void {
+    if (window && typeof console !== 'undefined' && console.debug) {
+      console.debug(_error)
+    }
+  }
+
   public supportsEvent (event: AnalyticsEvent<unknown>): boolean {
     return SyneriseBrowserDriver.SUPPORTED_EVENTS.includes(event.name)
   }
 
   public async track (event: AnalyticsEvent<unknown>): Promise<void> {
+    this.reportDebug('[Synerise] track')
     if (isCustomEvent(event)) {
       return await this.trackCustom(event)
     }
 
     const data = event.getData()
+    this.reportDebug('[Synerise] track ' + event.name)
 
     switch (event.name) {
       case 'page_view':
@@ -87,9 +94,11 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
     }
   }
 
-  protected async trackPageView (data: PageViewConfig): Promise<void> {
+  protected async trackPageView (_data: PageViewConfig): Promise<void> {
+    this.reportDebug('trackPageView')
     if (window.SR) {
-      window.SR.event.pageVisit({ pageTitle: data.pageTitle })
+      this.reportDebug('trackPageView SR')
+      window.SR.event.pageVisit()
     }
   }
 
