@@ -1,15 +1,16 @@
-import {TrackifyGlobals} from "./trackify-globals";
+import { TrackifyGlobals } from './trackify-globals'
 
 export type AnalyticsEventConfig = Record<string, string | number | undefined | Array<Record<string, string | number | undefined>> | Record<string, string | number | undefined>>;
 
 export interface AnalyticsEvent<T> {
   name: string;
+  label?: string;
 
-  getData(): T;
+  getData (): T;
 
-  setGlobals(globals: TrackifyGlobals): void;
+  setGlobals (globals: TrackifyGlobals): void;
 }
 
 export interface CustomAnalyticsEvent<T> extends AnalyticsEvent<T> {
-  forDriver(driverName: string): Record<string, unknown> | null;
+  forDriver (driverName: string): Record<string, unknown> | null;
 }
