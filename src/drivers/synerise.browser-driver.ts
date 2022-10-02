@@ -15,21 +15,26 @@ declare global {
   interface Window {
     SR?: {
       event: {
+        pageVisit: (
+          payload: Record<string, string>
+        ) => void,
         trackCustomEvent: (
           eventName: string,
           payload: Record<string, string | number | keyof typeof CurrencyCode | undefined> | undefined,
           label: string | undefined
         ) => void;
       }
-    };
+    }
   }
 }
 
 export default class SyneriseBrowserDriver implements AnalyticsDriver {
   public static SUPPORTED_EVENTS = [
-    'page.visit', // automatic
-    'session.start', // automatic
-    'session.end', // automatic
+    'page_visit',
+    // 'session.start', // automatic
+    // 'session.end', // automatic
+    'add_payment_info',
+    'add_to_cart',
     'purchase', // Data Layer
     'view_item', // Data Layer
     'view_item_list', // Data Layer
@@ -83,15 +88,9 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
   }
 
   protected async trackPageView (data: PageViewConfig): Promise<void> {
-    if (window.UE) {
-      window.UE.pageHit({
-        URL: data.pagePath
-      })
+    if (window.SR) {
+      window.SR.event.pageVisit({ pageTitle: data.pageTitle })
     }
-
-    this.push('event.page_view', {
-      URL: data.pagePath
-    })
   }
 
   protected async trackCustom (event: CustomAnalyticsEvent<unknown>): Promise<void> {
