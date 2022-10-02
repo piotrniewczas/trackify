@@ -16,7 +16,7 @@ declare global {
     UE?: { pageHit (config: Record<string, string>): void };
     userengage?: (
       eventName: string,
-      payload?: Record<string, string | number | keyof typeof CurrencyCode | undefined>
+      payload?: Record<string, string | number | keyof typeof CurrencyCode | boolean | null | undefined>
     ) => void;
   }
 }
