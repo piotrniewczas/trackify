@@ -28,7 +28,7 @@ declare global {
 
 export default class SyneriseBrowserDriver implements AnalyticsDriver {
   public static SUPPORTED_EVENTS = [
-    'page_visit',
+    'page_view',
     // 'session.start', // automatic
     // 'session.end', // automatic
     'add_payment_info',
