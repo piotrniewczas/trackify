@@ -117,9 +117,8 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
   }
 
   protected async trackPageView (_data: PageViewConfig): Promise<void> {
-    this.reportDebug('trackPageView')
-    if (window.SR) {
-      this.reportDebug('trackPageView SR')
+    if (window && window.SR && 'SR' in window && 'event' in window.SR) {
+      this.reportDebug('trackPageView')
       window.SR.event.pageVisit()
     }
   }
@@ -201,15 +200,30 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
   }
 
   private async updateUserData (data: UserDataConfig): Promise<void> {
-    // const jwt = this.createJWT(data)
+    this.setUuidAndIdentityHash(data)
     this.push('client.createOrUpdate', data as Record<string, string>, 'Client update data in account')
     console.debug(['[Synerise].client.createOrUpdate:', data as Record<string, string>])
 
   }
 
+  private setUuidAndIdentityHash (data: UserDataConfig): boolean {
+    if (window && window.SR && 'SR' in window && 'event' in window.SR && 'trackCustomEvent' in window.SR.event && data.email) {
+      let hash = window.SR.client.getIdentityHash()
+      const uuid = uuidv5(data.email + this.salt, uuidv5.URL)
+      console.debug(['UUID:', uuid])
+      if (!hash) {
+        hash = window.SR.client.hashIdentity(data.email as string)
+      }
+      window.SR.client.setUuidAndIdentityHash(hash, uuid)
+
+      return true
+    }
+    return false
+  }
+
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  private createJWT (data: UserDataConfig): void {
+  private createJWT (data: UserDataConfig): string {
     if (window && window.SR && 'SR' in window && 'event' in window.SR && 'trackCustomEvent' in window.SR.event) {
       let hash = window.SR.client.getIdentityHash()
       const uuid = uuidv5(data.email + this.salt, uuidv5.URL)
@@ -233,9 +247,11 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
 
       // window.SR.client.update(data as Record<string, string>, 'TEST')
     }
+    return ''
   }
 
   private async trackSignUp (data: SignUpConfig): Promise<void> {
+    this.setUuidAndIdentityHash(data)
     // const jwt = this.createJWT(data)
     this.push('client.createOrUpdate', data as Record<string, string>, 'Client create account')
     console.debug(['[Synerise].client.createOrUpdate:', data as Record<string, string>])
