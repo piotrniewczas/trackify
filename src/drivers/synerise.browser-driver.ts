@@ -2,12 +2,15 @@ import { AnalyticsDriver } from '../interfaces/analytics-driver'
 import { AnalyticsEvent, CustomAnalyticsEvent } from '../interfaces/analytics-event'
 import { CurrencyCode } from '../interfaces/trackify-globals'
 import { isCustomEvent } from '../helpers/fns'
+import { v5 as uuidv5 } from 'uuid'
+// import * as jose from 'jose'
+
 import {
   AddPaymentInfoConfig,
   AddToCartConfig,
   LoginConfig,
   PageViewConfig,
-  PurchaseConfig, SignUpConfig,
+  PurchaseConfig, SignUpConfig, UserDataConfig,
   ViewItemConfig, ViewItemListConfig
 } from '../interfaces/events/config'
 
@@ -21,6 +24,20 @@ declare global {
           payload: Record<string, string | number | keyof typeof CurrencyCode | undefined> | undefined,
           label: string | undefined
         ) => void;
+      },
+      client: {
+        clearAccessToken: () => void,
+        getCurrentClient: () => string,
+        getIdentityHash: () => string,
+        hashIdentity: (email: string) => string,
+        notify: () => void,
+        setAccessToken: (token: string) => void,
+        setUuid: (uuid: string) => void,
+        setUuidAndIdentityHash: (uuid: string, hash: string) => string,
+        update: (
+          params: Record<string, string>,
+          label: string
+        ) => void
       }
     }
   }
@@ -29,6 +46,7 @@ declare global {
 export default class SyneriseBrowserDriver implements AnalyticsDriver {
   public static SUPPORTED_EVENTS = [
     'page_view',
+    'user_data_update',
     // 'session.start', // automatic
     // 'session.end', // automatic
     'add_payment_info',
@@ -36,11 +54,13 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
     'purchase', // Data Layer
     'view_item', // Data Layer
     'view_item_list', // Data Layer
-    'login' // Data Layer
+    'login', // Data Layer
+    'sign_up' // Data Layer
   ]
   public static AVAILABILITY_CHECK_TIMEOUT = 250
   public static AVAILABILITY_CHECK_MAX_TIMEOUT = 1500
   protected name = 'SyneriseBrowserDriver'
+  private salt = 'synraise'
 
   public async load (): Promise<boolean> {
     try {
@@ -85,6 +105,8 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
         return await this.trackViewItem(data as ViewItemConfig)
       case 'view_item_list':
         return await this.trackViewItemList(data as ViewItemListConfig)
+      case 'user_data_update':
+        return await this.updateUserData(data as UserDataConfig)
       case 'login':
         return await this.trackLogin(data as LoginConfig)
       case 'sign_up':
@@ -126,6 +148,7 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
       data.label
     )
   }
+
 
 // SR.event.trackCustomEvent(
 //   "entries.count", // event action name
@@ -172,24 +195,54 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
   }
 
   private async trackLogin (data: LoginConfig): Promise<void> {
-    this.push('event.sign_in', { method: data.method })
+    this.push('client.identify', data as Record<string, string>, 'Client log in')
+    console.debug(['[Synerise].client.identify:', data as Record<string, string>])
+
+  }
+
+  private async updateUserData (data: UserDataConfig): Promise<void> {
+    // const jwt = this.createJWT(data)
+    this.push('client.createOrUpdate', data as Record<string, string>, 'Client update data in account')
+    console.debug(['[Synerise].client.createOrUpdate:', data as Record<string, string>])
+
+  }
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  private createJWT (data: UserDataConfig): void {
+    if (window && window.SR && 'SR' in window && 'event' in window.SR && 'trackCustomEvent' in window.SR.event) {
+      let hash = window.SR.client.getIdentityHash()
+      const uuid = uuidv5(data.email + this.salt, uuidv5.URL)
+      // console.debug(['UUID:', uuid])
+      if (!hash) {
+        hash = window.SR.client.hashIdentity(data.email as string)
+      }
+      window.SR.client.setUuidAndIdentityHash(hash, uuid)
+
+      // const privateKey = ''
+      // const jwt = await new jose.SignJWT({
+      //   uuid: uuid,
+      //   email: data.email
+      // })
+      //   .setProtectedHeader({ alg: 'RS256', typ: 'JWT' })
+      //   .setExpirationTime('24h')
+      //   .sign(privateKey)
+      // // const jwt = window.SR.client.setAccessToken()
+      // console.debug(['[JTW].client.createOrUpdate:', jwt])
+
+
+      // window.SR.client.update(data as Record<string, string>, 'TEST')
+    }
   }
 
   private async trackSignUp (data: SignUpConfig): Promise<void> {
-    console.log(data)
-
-    // this.push('event.sign_in')
-    // this.push('client.createOrUpdate', {
-    //   'First name': data.firstname,
-    //   'Last name': data.lastname,
-    //   email: data.email,
-    //   shop_user_id: data.id,
-    //   store_id: data.shop_id
-    // })
+    // const jwt = this.createJWT(data)
+    this.push('client.createOrUpdate', data as Record<string, string>, 'Client create account')
+    console.debug(['[Synerise].client.createOrUpdate:', data as Record<string, string>])
   }
 
   private async trackAddPaymentInfo (data: AddPaymentInfoConfig): Promise<void> {
-    console.log(data)
+    console.debug(data)
     // this.push('event.checkout-data-step')
     // this.push('client.update', {
     //   'First name': data.customer?.firstname,
@@ -200,7 +253,7 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
   }
 
   private async trackPurchase (data: PurchaseConfig): Promise<void> {
-    console.log(data)
+    console.debug(data)
 
     // this.push('event.purchase', {
     //   user_id: data.customer?.id,
@@ -243,7 +296,7 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
   }
 
   private async trackAddToCart (data: AddToCartConfig): Promise<void> {
-    console.log(data)
+    console.debug(data)
 
     // data.items.forEach(item => {
     //   this.push('product_event', {
@@ -274,7 +327,7 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
   }
 
   private async trackViewItem (data: ViewItemConfig): Promise<void> {
-    console.log(data)
+    console.debug(data)
 
     // data.items.forEach(item => {
     //   this.push('product_event', {
@@ -305,7 +358,7 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
   }
 
   private async trackViewItemList (data: ViewItemListConfig): Promise<void> {
-    console.log(data)
+    console.debug(data)
 
     //   data.items.forEach(item => {
     //     this.push('product_event', {

@@ -7,7 +7,7 @@ import {
   AddToCartConfig,
   LoginConfig,
   PageViewConfig,
-  PurchaseConfig, SignUpConfig,
+  PurchaseConfig, SignUpConfig, UserDataConfig,
   ViewItemConfig, ViewItemListConfig
 } from '../interfaces/events/config'
 
@@ -67,6 +67,8 @@ export default class UsercomBrowserDriver implements AnalyticsDriver {
         return await this.trackPurchase(data as PurchaseConfig)
       case 'view_item':
         return await this.trackViewItem(data as ViewItemConfig)
+      case 'user_data_update':
+        return await this.updateUserData(data as UserDataConfig)
       case 'view_item_list':
         return await this.trackViewItemList(data as ViewItemListConfig)
       case 'login':
@@ -144,6 +146,16 @@ export default class UsercomBrowserDriver implements AnalyticsDriver {
 
   private async trackSignUp (data: SignUpConfig): Promise<void> {
     this.push('event.sign_in')
+    this.push('client.update', {
+      'First name': data.firstname,
+      'Last name': data.lastname,
+      email: data.email,
+      shop_user_id: data.id,
+      store_id: data.shop_id
+    })
+  }
+
+  private async updateUserData (data: UserDataConfig): Promise<void> {
     this.push('client.update', {
       'First name': data.firstname,
       'Last name': data.lastname,

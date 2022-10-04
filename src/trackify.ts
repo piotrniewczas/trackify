@@ -54,6 +54,8 @@ export class Trackify {
     if (this.driversResolved) {
       return
     }
+    this.reportDebug('[Trackify drivers:]')
+    this.reportDebug(this.registeredDrivers)
 
     for (const [token, config] of this.registeredDrivers) {
       try {
@@ -61,7 +63,7 @@ export class Trackify {
         const driver = new driverConstructor(config || {})
 
         const driverLoaded = await driver.load()
-
+        this.reportDebug('[Trackify] Driver load:' + driver.constructor.name)
         if (driverLoaded) {
           this.drivers.set(token, driver)
         }
@@ -84,6 +86,7 @@ export class Trackify {
       this.drivers.forEach(async (driver: AnalyticsDriver) => {
         if (driver.supportsEvent(event)) {
           try {
+            console.debug('[Trackify.track]: ' + driver.constructor.name)
             await driver.track(event)
           } catch (error: unknown) {
             this.reportError(error)
@@ -105,6 +108,12 @@ export class Trackify {
   protected reportError (error: unknown): void {
     if (typeof console !== 'undefined' && console.error) {
       console.error(error)
+    }
+  }
+
+  protected reportDebug (log: unknown): void {
+    if (typeof console !== 'undefined' && console.debug) {
+      console.debug(log)
     }
   }
 }

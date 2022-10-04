@@ -41,6 +41,21 @@ export interface LoginConfig extends AnalyticsEventConfig {
   method: string;
 }
 
+export interface UserDataConfig extends AnalyticsEventConfig {
+  firstname?: string;
+  lastname?: string;
+  email?: string;
+  id?: string;
+  shop_id?: string;
+  dateOfBirth?: string;
+  phone?: string;
+  sex?: string;
+  ip?: string;
+  country?: string;
+  city?: string;
+  province?: string;
+}
+
 export interface SignUpConfig extends AnalyticsEventConfig {
   method: string;
   firstname?: string;
