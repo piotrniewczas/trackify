@@ -54,8 +54,8 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
     'purchase', // Data Layer
     'view_item', // Data Layer
     'view_item_list', // Data Layer
-    'login', // Data Layer
-    'sign_up' // Data Layer
+    'login',
+    'sign_up'
   ]
   public static AVAILABILITY_CHECK_TIMEOUT = 250
   public static AVAILABILITY_CHECK_MAX_TIMEOUT = 1500
@@ -194,13 +194,19 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
   }
 
   private async trackLogin (data: LoginConfig): Promise<void> {
-    this.push('client.identify', data as Record<string, string>, 'Client log in')
-    console.debug(['[Synerise].client.identify:', data as Record<string, string>])
+    this.reportDebug(['[Debug login]', data])
+//Fallback for anonymous user session in synerise
+    this.push('client.createOrUpdate', { email: data.email as string }, 'Client update data in account')
+
+    const identify = this.setUuidAndIdentityHash(data)
+    if (identify) {
+      this.push('client.identify', data as Record<string, string>, 'Client log in')
+      console.debug(['[Synerise].client.identify:', data as Record<string, string>])
+    }
 
   }
 
   private async updateUserData (data: UserDataConfig): Promise<void> {
-    this.setUuidAndIdentityHash(data)
     this.push('client.createOrUpdate', data as Record<string, string>, 'Client update data in account')
     console.debug(['[Synerise].client.createOrUpdate:', data as Record<string, string>])
 
@@ -210,13 +216,17 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
     if (window && window.SR && 'SR' in window && 'event' in window.SR && 'trackCustomEvent' in window.SR.event && data.email) {
       let hash = window.SR.client.getIdentityHash()
       const uuid = uuidv5(data.email + this.salt, uuidv5.URL)
-      console.debug(['UUID:', uuid])
       if (!hash) {
         hash = window.SR.client.hashIdentity(data.email as string)
       }
-      window.SR.client.setUuidAndIdentityHash(hash, uuid)
-
-      return true
+      const newHash = window.SR.client.hashIdentity(data.email as string)
+      // console.debug(['hash:', hash])
+      // console.debug(['newHash:', newHash])
+      if (hash !== newHash) {
+        console.debug(['New UUID and Hash:', uuid, newHash])
+        window.SR.client.setUuidAndIdentityHash(newHash, uuid)
+        return true
+      }
     }
     return false
   }
