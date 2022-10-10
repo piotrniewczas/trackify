@@ -10,7 +10,7 @@ import {
   AddToCartConfig,
   LoginConfig,
   PageViewConfig,
-  PurchaseConfig, SignUpConfig, UserDataConfig,
+  PurchaseConfig, SignUpConfig, SubscribeConfig, UserDataConfig,
   ViewItemConfig, ViewItemListConfig
 } from '../interfaces/events/config'
 
@@ -23,6 +23,10 @@ declare global {
           eventName: string,
           payload: Record<string, string | number | keyof typeof CurrencyCode | undefined> | undefined,
           label: string | undefined
+        ) => void;
+        sendFormData: (
+          eventName: string,
+          payload: Record<string, string | number | keyof typeof CurrencyCode | undefined> | undefined
         ) => void;
       },
       client: {
@@ -47,20 +51,20 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
   public static SUPPORTED_EVENTS = [
     'page_view',
     'user_data_update',
-    // 'session.start', // automatic
-    // 'session.end', // automatic
+    'subscribe',
+    'unsubscribe',
     'add_payment_info',
     'add_to_cart',
-    'purchase', // Data Layer
-    'view_item', // Data Layer
-    'view_item_list', // Data Layer
+    'purchase',
+    'view_item',
+    'view_item_list',
     'login',
     'sign_up'
   ]
   public static AVAILABILITY_CHECK_TIMEOUT = 250
   public static AVAILABILITY_CHECK_MAX_TIMEOUT = 1500
   protected name = 'SyneriseBrowserDriver'
-  private salt = 'synraise'
+  private salt = 'synerise'
 
   public async load (): Promise<boolean> {
     try {
@@ -101,6 +105,10 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
         return await this.trackAddToCart(data as AddToCartConfig)
       case 'purchase':
         return await this.trackPurchase(data as PurchaseConfig)
+      case 'subscribe':
+        return await this.subscribe(data as SubscribeConfig)
+      case 'unsubscribe':
+        return await this.unsubscribe(data as SubscribeConfig)
       case 'view_item':
         return await this.trackViewItem(data as ViewItemConfig)
       case 'view_item_list':
@@ -148,22 +156,6 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
     )
   }
 
-
-// SR.event.trackCustomEvent(
-//   "entries.count", // event action name
-//   { // additional parameters
-//     "lat": "50.0937",
-//     "lon": "18.5429",
-//     "object": "Shopping center",
-//     "shopId": "S198",
-//     "shopName": "Chicago",
-//     "zipCode": "60639",
-//     "street": "W North Ave",
-//     "time": 1556474400000,
-//     "entries": 27,
-//   },
-//   "Entries count" // human-readable label
-// )
   protected push (
     eventName: string,
     payload?: Record<string, string | number | keyof typeof CurrencyCode | undefined>,
@@ -171,6 +163,15 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
   ): void {
     if (window && window.SR && 'SR' in window && 'event' in window.SR && 'trackCustomEvent' in window.SR.event) {
       window.SR.event.trackCustomEvent(eventName, payload, label)
+    }
+  }
+
+  protected sendForm (
+    eventName: string,
+    payload?: Record<string, string | number | keyof typeof CurrencyCode | undefined>
+  ): void {
+    if (window && window.SR && 'SR' in window && 'event' in window.SR && 'sendFormData' in window.SR.event) {
+      window.SR.event.sendFormData(eventName, payload)
     }
   }
 
@@ -195,7 +196,7 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
 
   private async trackLogin (data: LoginConfig): Promise<void> {
     this.reportDebug(['[Debug login]', data])
-//Fallback for anonymous user session in synerise
+    // Fallback for anonymous user session in synerise
     this.push('client.createOrUpdate', { email: data.email as string }, 'Client update data in account')
 
     const identify = this.setUuidAndIdentityHash(data)
@@ -209,7 +210,6 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
   private async updateUserData (data: UserDataConfig): Promise<void> {
     this.push('client.createOrUpdate', data as Record<string, string>, 'Client update data in account')
     console.debug(['[Synerise].client.createOrUpdate:', data as Record<string, string>])
-
   }
 
   private setUuidAndIdentityHash (data: UserDataConfig): boolean {
@@ -267,8 +267,8 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
     console.debug(['[Synerise].client.createOrUpdate:', data as Record<string, string>])
   }
 
-  private async trackAddPaymentInfo (data: AddPaymentInfoConfig): Promise<void> {
-    console.debug(data)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private async trackAddPaymentInfo (_data: AddPaymentInfoConfig): Promise<void> {
     // this.push('event.checkout-data-step')
     // this.push('client.update', {
     //   'First name': data.customer?.firstname,
@@ -278,9 +278,24 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
     // })
   }
 
-  private async trackPurchase (data: PurchaseConfig): Promise<void> {
-    console.debug(data)
+  private async unsubscribe (_data: SubscribeConfig): Promise<void> {
+    this.sendForm('newsletter-unsubscribe', {
+      email: _data.email
+    })
+  }
 
+  private async subscribe (_data: SubscribeConfig): Promise<void> {
+    this.sendForm('newsletter-agreement', {
+      email: _data.email,
+      list: _data.list,
+      newsletterAgreement: _data.allow_marketing,
+      allowPolicy: _data.allow_policy,
+      newsletterLanguage: _data.language
+    })
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private async trackPurchase (_data: PurchaseConfig): Promise<void> {
     // this.push('event.purchase', {
     //   user_id: data.customer?.id,
     //   order_id: data.transactionId,
@@ -321,8 +336,8 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
     // })
   }
 
-  private async trackAddToCart (data: AddToCartConfig): Promise<void> {
-    console.debug(data)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private async trackAddToCart (_data: AddToCartConfig): Promise<void> {
 
     // data.items.forEach(item => {
     //   this.push('product_event', {
@@ -352,8 +367,8 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
     // })
   }
 
-  private async trackViewItem (data: ViewItemConfig): Promise<void> {
-    console.debug(data)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private async trackViewItem (_data: ViewItemConfig): Promise<void> {
 
     // data.items.forEach(item => {
     //   this.push('product_event', {
@@ -383,8 +398,8 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
     // })
   }
 
-  private async trackViewItemList (data: ViewItemListConfig): Promise<void> {
-    console.debug(data)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private async trackViewItemList (_data: ViewItemListConfig): Promise<void> {
 
     //   data.items.forEach(item => {
     //     this.push('product_event', {
