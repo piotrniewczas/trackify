@@ -7,7 +7,7 @@ import {
   AddToCartConfig,
   LoginConfig,
   PageViewConfig,
-  PurchaseConfig, SignUpConfig, UserDataConfig,
+  PurchaseConfig, SignUpConfig, SubscribeConfig, UserDataConfig,
   ViewItemConfig, ViewItemListConfig
 } from '../interfaces/events/config'
 
@@ -29,7 +29,9 @@ export default class UsercomBrowserDriver implements AnalyticsDriver {
     'purchase',
     'view_item',
     'view_item_list',
-    'login'
+    'login',
+    'subscribe',
+    'unsubscribe'
   ]
   public static AVAILABILITY_CHECK_TIMEOUT = 250
   public static AVAILABILITY_CHECK_MAX_TIMEOUT = 1500
@@ -75,6 +77,10 @@ export default class UsercomBrowserDriver implements AnalyticsDriver {
         return await this.trackLogin(data as LoginConfig)
       case 'sign_up':
         return await this.trackSignUp(data as SignUpConfig)
+      case 'subscribe':
+        return await UsercomBrowserDriver.subscribe(data as SubscribeConfig)
+      case 'unsubscribe':
+        return await UsercomBrowserDriver.unsubscribe(data as SubscribeConfig)
       default:
         throw new TypeError(`Event ${event.name} not supported!`)
     }
@@ -301,5 +307,33 @@ export default class UsercomBrowserDriver implements AnalyticsDriver {
         image_url: item.image
       })
     })
+  }
+
+
+  private static async subscribe (_data: SubscribeConfig): Promise<void> {
+    if (window.UE) {
+      window.UE.pageHit({
+        email: _data.email,
+        user_id: (new Date().getTime()).toString()
+      })
+    }
+    if (window.userengage) {
+      window.userengage('event.subscribe', {
+        email: _data.email,
+        list: _data.list,
+        newsletterAgreement: _data.allow_marketing,
+        allowPolicy: _data.allow_policy,
+        newsletterLanguage: _data.language,
+        storeCode: _data.storeCode
+      })
+    }
+  }
+
+  private static async unsubscribe (_data: SubscribeConfig): Promise<void> {
+    if (window.userengage) {
+      window.userengage('event.unsubscribe', {
+        email: _data.email
+      })
+    }
   }
 }
