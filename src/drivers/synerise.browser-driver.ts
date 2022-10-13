@@ -196,15 +196,13 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
 
   private async trackLogin (data: LoginConfig): Promise<void> {
     this.reportDebug(['[Debug login]', data])
-    // Fallback for anonymous user session in synerise
-    this.push('client.createOrUpdate', { email: data.email as string }, 'Client update data in account')
+    this.sendForm('login', data as Record<string, string>)
 
-    const identify = this.setUuidAndIdentityHash(data)
-    if (identify) {
-      this.push('client.identify', data as Record<string, string>, 'Client log in')
-      console.debug(['[Synerise].client.identify:', data as Record<string, string>])
-    }
-
+    // const identify = this.setUuidAndIdentityHash(data)
+    // if (identify) {
+    //   this.push('client.identify', data as Record<string, string>, 'Client log in')
+    //   console.debug(['[Synerise].client.identify:', data as Record<string, string>])
+    // }
   }
 
   private async updateUserData (data: UserDataConfig): Promise<void> {
@@ -212,6 +210,8 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
     console.debug(['[Synerise].client.createOrUpdate:', data as Record<string, string>])
   }
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   private setUuidAndIdentityHash (data: UserDataConfig): boolean {
     if (window && window.SR && 'SR' in window && 'event' in window.SR && 'trackCustomEvent' in window.SR.event && data.email) {
       let hash = window.SR.client.getIdentityHash()
@@ -261,10 +261,12 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
   }
 
   private async trackSignUp (data: SignUpConfig): Promise<void> {
-    this.setUuidAndIdentityHash(data)
+    // this.setUuidAndIdentityHash(data)
     // const jwt = this.createJWT(data)
-    this.push('client.createOrUpdate', data as Record<string, string>, 'Client create account')
-    console.debug(['[Synerise].client.createOrUpdate:', data as Record<string, string>])
+    this.sendForm('signup', data as Record<string, string>)
+
+    // this.push('client.createOrUpdate', data as Record<string, string>, 'Client create account')
+    // console.debug(['[Synerise].client.createOrUpdate:', data as Record<string, string>])
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
