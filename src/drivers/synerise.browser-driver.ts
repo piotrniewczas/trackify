@@ -22,11 +22,12 @@ declare global {
         trackCustomEvent: (
           eventName: string,
           payload: Record<string, string | number | keyof typeof CurrencyCode | undefined> | undefined,
-          label: string | undefined
+          label?: string
         ) => void;
         sendFormData: (
           eventName: string,
-          payload: Record<string, string | number | keyof typeof CurrencyCode | undefined> | undefined
+          payload: Record<string, string | number | keyof typeof CurrencyCode | undefined> | undefined,
+          mapping?: Record<string, string>
         ) => void;
       },
       client: {
@@ -48,6 +49,7 @@ declare global {
 }
 
 export default class SyneriseBrowserDriver implements AnalyticsDriver {
+
   public static SUPPORTED_EVENTS = [
     'page_view',
     'user_data_update',
@@ -63,7 +65,7 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
   ]
   public static AVAILABILITY_CHECK_TIMEOUT = 250
   public static AVAILABILITY_CHECK_MAX_TIMEOUT = 1500
-  protected name = 'SyneriseBrowserDriver'
+  public name = 'SyneriseBrowserDriver'
   private salt = 'synerise'
 
   public async load (): Promise<boolean> {
@@ -84,7 +86,7 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
   }
 
   public supportsEvent (event: AnalyticsEvent<unknown>): boolean {
-    return SyneriseBrowserDriver.SUPPORTED_EVENTS.includes(event.name)
+    return SyneriseBrowserDriver.SUPPORTED_EVENTS.includes(event.name) || event.name.indexOf('custom.') >= 0
   }
 
   public async track (event: AnalyticsEvent<unknown>): Promise<void> {
@@ -132,6 +134,7 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
   }
 
   protected async trackCustom (event: CustomAnalyticsEvent<unknown>): Promise<void> {
+    this.reportDebug(['[Synerise custom track]', event])
     const data = event.forDriver(this.name)
     if (data === null) {
       return
@@ -145,14 +148,30 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
       throw new TypeError(`Custom event ${event.name} has to provide event payload for ${this.name} [forDriver.event_payload]`)
     }
 
-    if (typeof data.label !== 'string') {
-      throw new TypeError(`Custom event ${event.name} has to provide event name for ${this.name} [forDriver.label]`)
-    }
 
-    return this.push(
+    if (data.event_type === 'form') {
+      this.reportDebug([
+        '[Synerise custom track.form]',
+        data.event_name,
+        data.event_payload as Record<string, string | number | undefined | keyof typeof CurrencyCode>,
+        data.event_mapping
+      ])
+      return this.sendForm(
+        data.event_name,
+        data.event_payload as Record<string, string | number | undefined | keyof typeof CurrencyCode>,
+        data.event_mapping as Record<string, string>
+      )
+    }
+    this.reportDebug([
+      '[Synerise custom track.push]',
       data.event_name,
       data.event_payload as Record<string, string | number | undefined | keyof typeof CurrencyCode>,
       data.label
+    ])
+    return this.push(
+      data.event_name,
+      data.event_payload as Record<string, string | number | undefined | keyof typeof CurrencyCode>,
+      data.label as string
     )
   }
 
@@ -168,10 +187,11 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
 
   protected sendForm (
     eventName: string,
-    payload?: Record<string, string | number | keyof typeof CurrencyCode | undefined>
+    payload?: Record<string, string | number | keyof typeof CurrencyCode | undefined>,
+    mapping?: Record<string, string>
   ): void {
     if (window && window.SR && 'SR' in window && 'event' in window.SR && 'sendFormData' in window.SR.event) {
-      window.SR.event.sendFormData(eventName, payload)
+      window.SR.event.sendFormData(eventName, payload, mapping)
     }
   }
 

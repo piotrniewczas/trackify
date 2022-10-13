@@ -35,7 +35,7 @@ export default class UsercomBrowserDriver implements AnalyticsDriver {
   ]
   public static AVAILABILITY_CHECK_TIMEOUT = 250
   public static AVAILABILITY_CHECK_MAX_TIMEOUT = 1500
-  protected name = 'UsercomBrowserDriver'
+  public name = 'UsercomBrowserDriver'
 
   public async load (): Promise<boolean> {
     try {
@@ -48,7 +48,7 @@ export default class UsercomBrowserDriver implements AnalyticsDriver {
   }
 
   public supportsEvent (event: AnalyticsEvent<unknown>): boolean {
-    return UsercomBrowserDriver.SUPPORTED_EVENTS.includes(event.name)
+    return UsercomBrowserDriver.SUPPORTED_EVENTS.includes(event.name) || event.name.indexOf('custom.') >= 0
   }
 
   public async track (event: AnalyticsEvent<unknown>): Promise<void> {

@@ -76,7 +76,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
     'login',
     'sign_up'
   ]
-  protected name = 'GTMBrowserDriver'
+  public name = 'GTMBrowserDriver'
   protected layerId = 'dataLayer'
 
   constructor (config: AnalyticsDriverConfig) {
@@ -92,7 +92,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   }
 
   public supportsEvent (event: AnalyticsEvent<unknown>): boolean {
-    return GTMBrowserDriver.SUPPORTED_EVENTS.includes(event.name)
+    return GTMBrowserDriver.SUPPORTED_EVENTS.includes(event.name) || event.name.indexOf('custom.') >= 0
   }
 
   public async track (event: SupportedEvent): Promise<void> {

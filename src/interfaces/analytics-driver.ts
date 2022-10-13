@@ -1,17 +1,19 @@
-import {AnalyticsEvent} from "./analytics-event";
+import { AnalyticsEvent } from './analytics-event'
 
 export interface AnalyticsDriver {
-  load(): Promise<boolean>;
+  name: string
 
-  supportsEvent(event: AnalyticsEvent<unknown>): boolean;
+  load (): Promise<boolean>;
 
-  track(event: AnalyticsEvent<unknown>): Promise<void>;
+  supportsEvent (event: AnalyticsEvent<unknown>): boolean;
+
+  track (event: AnalyticsEvent<unknown>): Promise<void>;
 }
 
 export type AnalyticsDriverConfig = Record<string, unknown>;
 
 export interface AnalyticsDriverConstructor {
-  new(config: AnalyticsDriverConfig): AnalyticsDriver
+  new (config: AnalyticsDriverConfig): AnalyticsDriver
 }
 
 export type AnalyticsDriverToken = symbol;

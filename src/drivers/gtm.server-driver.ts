@@ -1,6 +1,8 @@
 import {AnalyticsDriver} from "../interfaces/analytics-driver";
 
 export default class GTMServerDriver implements AnalyticsDriver {
+  public name = 'GTMServerDriver'
+
   public async load(): Promise<boolean> {
     return false;
   }
