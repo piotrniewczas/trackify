@@ -37,6 +37,20 @@ export interface BeginCheckoutConfig extends AnalyticsEventConfig {
   items: Array<Item>
 }
 
+export interface CustomerConfig extends AnalyticsEventConfig {
+  method: string;
+  firstname?: string;
+  lastname?: string;
+  email?: string;
+  phone?: string;
+  id?: string;
+  gender?: string;
+  birthDate?: string;
+  province?: string;
+  zipCode?: string;
+  country?: string;
+}
+
 export interface LoginConfig extends AnalyticsEventConfig {
   method: string;
   firstname?: string;

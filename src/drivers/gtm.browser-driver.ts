@@ -4,7 +4,7 @@ import {
   AddPaymentInfoConfig,
   AddShippingInfoConfig,
   AddToCartConfig,
-  BeginCheckoutConfig,
+  BeginCheckoutConfig, CustomerConfig,
   LoginConfig,
   PageViewConfig,
   PurchaseConfig,
@@ -353,17 +353,40 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
     })
   }
 
+  protected pushCustomer (
+    payload: CustomerConfig
+  ): void {
+    (window[this.layerId] as Array<unknown>).push({
+      'customer': {
+        'em': payload.email,     // Lowercase customer email
+        'fn': payload.firstname,                   // Lowercase customer first name
+        'ln': payload.lastname,                  // Lowercase customer last name
+        'ph': payload.phone ?? '',            // Customer phone with country code, digits only (+ should be changed into 00,
+        // i.e. +48 => 0048)
+        'external_id': payload.id ?? '',    // External user identifier in CRM i.e. client identifier (if applicable)
+        'ge': payload.gender ?? '',                      // Customer gender (optional)
+        'db': payload.birthDate ?? '',               // Birthdate (optional) in YYYYMMDD format
+        'ct': payload.city ?? '',              // Lowercase customer city name
+        'st': payload.province ?? '',                     // Lowercase customer state (province) name
+        'zp': payload.zipCode ?? '',                  // Zip code (numbers only)
+        'country': payload.country ?? ''                 // Lowercase, 2-digit country code slug
+      }
+    })
+  }
+
   protected monetaryValue (value: number): number {
     return Math.round((value + Number.EPSILON) * 100) / 100
   }
 
   private async trackLogin (data: LoginConfig): Promise<void> {
+    this.pushCustomer(data)
     this.pushCommon('login', {
       method: data.method
     })
   }
 
   private async trackSignUp (data: SignUpConfig): Promise<void> {
+    this.pushCustomer(data)
     this.pushCommon('sign_up', {
       method: data.method
     })
