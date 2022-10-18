@@ -69,6 +69,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
     'add_to_cart',
     'begin_checkout',
     'purchase',
+    'pre_purchase',
     'remove_from_cart',
     'view_cart',
     'view_item',
@@ -118,6 +119,8 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
         return await this.trackBeginCheckout(data as BeginCheckoutConfig)
       case 'purchase':
         return await this.trackPurchase(data as PurchaseConfig)
+      case 'pre_purchase':
+        return await this.trackPrePurchase(data as PurchaseConfig)
       case 'remove_from_cart':
         return await this.trackRemoveFromCart(data as RemoveFromCartConfig)
       case 'view_cart':
@@ -225,6 +228,19 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
 
   protected async trackPurchase (data: PurchaseConfig): Promise<void> {
     this.pushEcommerce('purchase', {
+      currency: data.currency,
+      transaction_id: data.transactionId,
+      value: this.monetaryValue(data.value),
+      affiliation: data.affiliation,
+      coupon: data.coupon,
+      shipping: data.shipping ? this.monetaryValue(data.shipping) : undefined,
+      tax: data.tax ? this.monetaryValue(data.tax) : undefined,
+      items: this.getItems(data)
+    })
+  }
+
+  protected async trackPrePurchase (data: PurchaseConfig): Promise<void> {
+    this.pushEcommerce('pre-purchase', {
       currency: data.currency,
       transaction_id: data.transactionId,
       value: this.monetaryValue(data.value),
