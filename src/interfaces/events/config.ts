@@ -39,6 +39,11 @@ export interface BeginCheckoutConfig extends AnalyticsEventConfig {
 
 export interface LoginConfig extends AnalyticsEventConfig {
   method: string;
+  firstname?: string;
+  lastname?: string;
+  email?: string;
+  id?: string;
+  shop_id?: string;
 }
 
 export interface SubscribeConfig extends AnalyticsEventConfig {
