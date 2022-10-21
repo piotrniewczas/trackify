@@ -31,8 +31,9 @@ export default class UsercomBrowserDriver implements AnalyticsDriver {
     'view_item_list',
     'login'
   ]
-  public static AVAILABILITY_CHECK_TIMEOUT = 250
+  public static AVAILABILITY_CHECK_TIMEOUT = 1000
   public static AVAILABILITY_CHECK_MAX_TIMEOUT = 1500
+  public static LOAD_DRIVER_REPEATS = 5
   protected name = 'UsercomBrowserDriver'
 
   public async load (): Promise<boolean> {
@@ -119,15 +120,17 @@ export default class UsercomBrowserDriver implements AnalyticsDriver {
     }
   }
 
-  protected checkIfUsercomLoaded (timeout = 0): Promise<void> {
+  protected checkIfUsercomLoaded (index = 0): Promise<void> {
     return new Promise((resolve, reject) => {
+      if (index > UsercomBrowserDriver.LOAD_DRIVER_REPEATS) {
+        reject()
+      }
       if (window.userengage && window.UE) {
         resolve()
-      } else if (timeout >= UsercomBrowserDriver.AVAILABILITY_CHECK_MAX_TIMEOUT) {
-        reject()
       } else {
         setTimeout(() => {
-          this.checkIfUsercomLoaded(timeout + UsercomBrowserDriver.AVAILABILITY_CHECK_TIMEOUT).then(() => resolve())
+          this.checkIfUsercomLoaded(index++)
+            .then(() => resolve())
             .catch(() => reject())
         }, UsercomBrowserDriver.AVAILABILITY_CHECK_TIMEOUT)
       }
