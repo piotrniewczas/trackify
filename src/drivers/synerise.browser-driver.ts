@@ -163,8 +163,8 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
     if (window && window.SR && 'SR' in window && 'event' in window.SR) {
       this.reportDebug('trackPageView')
       window.SR.event.pageVisit({
-        page_path: data.pagePath,
-        page_title: data.pageTitle,
+        uri: '/' + data.pagePath,
+        title: data.pageTitle,
         currency: data.currency as string
       })
     }
