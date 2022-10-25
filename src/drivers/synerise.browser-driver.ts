@@ -146,6 +146,8 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
         return await this.subscribe(data as SubscribeConfig)
       case 'unsubscribe':
         return await this.unsubscribe(data as SubscribeConfig)
+      case 'view_cart':
+        return await this.trackViewCart(data as ViewCartConfig)
       case 'view_item':
         return await this.trackViewItem(data as ViewItemConfig)
       case 'view_item_list':
