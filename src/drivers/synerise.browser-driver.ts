@@ -7,12 +7,38 @@ import { v5 as uuidv5 } from 'uuid'
 
 import {
   AddPaymentInfoConfig,
+  AddShippingInfoConfig,
   AddToCartConfig,
+  BeginCheckoutConfig,
   LoginConfig,
   PageViewConfig,
-  PurchaseConfig, SignUpConfig, SubscribeConfig, UserDataConfig,
-  ViewItemConfig, ViewItemListConfig
+  PurchaseConfig,
+  RemoveFromCartConfig,
+  SignUpConfig,
+  SubscribeConfig,
+  UserDataConfig,
+  ViewCartConfig,
+  ViewItemConfig,
+  ViewItemListConfig
 } from '../interfaces/events/config'
+
+export type SupportedEventData =
+  PageViewConfig
+  | AddPaymentInfoConfig
+  | AddShippingInfoConfig
+  | AddToCartConfig
+  | BeginCheckoutConfig
+  | PurchaseConfig
+  | RemoveFromCartConfig
+  | ViewCartConfig
+  | ViewItemConfig
+  | ViewItemListConfig
+  | LoginConfig
+  | SubscribeConfig
+  | UserDataConfig
+  | SignUpConfig;
+export type SupportedEvent = AnalyticsEvent<SupportedEventData> | CustomAnalyticsEvent<unknown>;
+
 
 declare global {
   interface Window {
@@ -21,12 +47,12 @@ declare global {
         pageVisit: () => void,
         trackCustomEvent: (
           eventName: string,
-          payload: Record<string, string | number | keyof typeof CurrencyCode | undefined> | undefined,
+          payload: Record<string, string | number | keyof typeof CurrencyCode | SynItem[] | undefined> | undefined,
           label?: string
         ) => void;
         sendFormData: (
           eventName: string,
-          payload: Record<string, string | number | keyof typeof CurrencyCode | undefined> | undefined,
+          payload: Record<string, string | number | keyof typeof CurrencyCode | SynItem[] | undefined> | undefined,
           mapping?: Record<string, string>
         ) => void;
       },
@@ -46,6 +72,13 @@ declare global {
       }
     }
   }
+}
+
+export interface SynItem extends Record<string, unknown> {
+  sku: string,
+  quantity: string,
+  brand: string,
+  category: string
 }
 
 export default class SyneriseBrowserDriver implements AnalyticsDriver {
@@ -177,7 +210,7 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
 
   protected push (
     eventName: string,
-    payload?: Record<string, string | number | keyof typeof CurrencyCode | undefined>,
+    payload?: Record<string, string | number | keyof typeof CurrencyCode | undefined | SynItem[]>,
     label?: string
   ): void {
     if (window && window.SR && 'SR' in window && 'event' in window.SR && 'trackCustomEvent' in window.SR.event) {
@@ -316,138 +349,44 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
     })
   }
 
+  protected async trackViewCart (data: ViewCartConfig): Promise<void> {
+    this.push('cart.status', {
+      currency: data.currency,
+      value: this.monetaryValue(data.value),
+      products: this.getItems(data)
+    })
+  }
+
+  protected getItems (data: SupportedEventData): Array<SynItem> {
+    const items: SynItem[] = []
+    Array.isArray(data.items) ? data.items.map((item) => (
+      items.push({
+        sku: item.id as string,
+        quantity: item.quantity as string,
+        brand: item.brand as string,
+        category: item.category as string
+      })
+    )) : []
+    return items
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private async trackPurchase (_data: PurchaseConfig): Promise<void> {
-    // this.push('event.purchase', {
-    //   user_id: data.customer?.id,
-    //   order_id: data.transactionId,
-    //   total: data.value ? this.monetaryValue(data.value) : undefined,
-    //   value: data.value ? this.monetaryValue(data.value) : undefined,
-    //   discount: data.discount ? this.monetaryValue(data.discount) : undefined,
-    //   shipping: data.shipping ? this.monetaryValue(data.shipping) : undefined,
-    //   tax: data.tax ? this.monetaryValue(data.tax) : undefined,
-    //   coupon: data.coupon,
-    //   currency: data.currency
-    // })
     //
-    // data.items.forEach(item => {
-    //   this.push('product_event', {
-    //     event_type: 'purchase',
-    //     list: item.listId,
-    //     product_id: item.sku,
-    //     name: item.name,
-    //     brand: item.brand,
-    //     sku: item.sku,
-    //     ean: item.ean,
-    //     category: [
-    //       item.category,
-    //       item.category2,
-    //       item.category3,
-    //       item.category4,
-    //       item.category5
-    //     ].filter(c => typeof c === 'string' && c.length).join(' > '),
-    //     variant: item.variant,
-    //     price: item.price ? this.monetaryValue(item.price as number) : undefined,
-    //     value: item.price ? this.monetaryValue(item.price as number) : undefined,
-    //     quantity: typeof item.qty !== 'undefined' ? item.qty : 1,
-    //     currency: item.currency,
-    //     position: item.index,
-    //     url: item.url,
-    //     image_url: item.image
-    //   })
-    // })
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private async trackAddToCart (_data: AddToCartConfig): Promise<void> {
-
-    // data.items.forEach(item => {
-    //   this.push('product_event', {
-    //     event_type: 'add to cart',
-    //     list: item.listId,
-    //     product_id: item.sku,
-    //     name: item.name,
-    //     brand: item.brand,
-    //     sku: item.sku,
-    //     ean: item.ean,
-    //     category: [
-    //       item.category,
-    //       item.category2,
-    //       item.category3,
-    //       item.category4,
-    //       item.category5
-    //     ].filter(c => typeof c === 'string' && c.length).join(' > '),
-    //     variant: item.variant,
-    //     price: item.price ? this.monetaryValue(item.price as number) : undefined,
-    //     value: item.price ? this.monetaryValue(item.price as number) : undefined,
-    //     quantity: typeof item.qty !== 'undefined' ? item.qty : 1,
-    //     currency: item.currency,
-    //     position: item.index,
-    //     url: item.url,
-    //     image_url: item.image
-    //   })
-    // })
+    //
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private async trackViewItem (_data: ViewItemConfig): Promise<void> {
-
-    // data.items.forEach(item => {
-    //   this.push('product_event', {
-    //     event_type: 'view',
-    //     list: item.listId,
-    //     product_id: item.sku,
-    //     name: item.name,
-    //     brand: item.brand,
-    //     sku: item.sku,
-    //     ean: item.ean,
-    //     category: [
-    //       item.category,
-    //       item.category2,
-    //       item.category3,
-    //       item.category4,
-    //       item.category5
-    //     ].filter(c => typeof c === 'string' && c.length).join(' > '),
-    //     variant: item.variant,
-    //     price: item.price ? this.monetaryValue(item.price as number) : undefined,
-    //     value: item.price ? this.monetaryValue(item.price as number) : undefined,
-    //     quantity: typeof item.qty !== 'undefined' ? item.qty : 1,
-    //     currency: item.currency,
-    //     position: item.index,
-    //     url: item.url,
-    //     image_url: item.image
-    //   })
-    // })
+    //
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private async trackViewItemList (_data: ViewItemListConfig): Promise<void> {
-
-    //   data.items.forEach(item => {
-    //     this.push('product_event', {
-    //       event_type: 'view',
-    //       list: item.listId,
-    //       product_id: item.sku,
-    //       name: item.name,
-    //       brand: item.brand,
-    //       sku: item.sku,
-    //       ean: item.ean,
-    //       category: [
-    //         item.category,
-    //         item.category2,
-    //         item.category3,
-    //         item.category4,
-    //         item.category5
-    //       ].filter(c => typeof c === 'string' && c.length).join(' > '),
-    //       variant: item.variant,
-    //       price: item.price ? this.monetaryValue(item.price as number) : undefined,
-    //       value: item.price ? this.monetaryValue(item.price as number) : undefined,
-    //       quantity: typeof item.qty !== 'undefined' ? item.qty : 1,
-    //       currency: item.currency,
-    //       position: item.index,
-    //       url: item.url,
-    //       image_url: item.image
-    //     })
-    //   })
+    //
   }
 }
