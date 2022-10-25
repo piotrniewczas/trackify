@@ -44,7 +44,7 @@ declare global {
   interface Window {
     SR?: {
       event: {
-        pageVisit: () => void,
+        pageVisit: (payload: Record<string, string>) => void,
         trackCustomEvent: (
           eventName: string,
           payload: Record<string, string | number | keyof typeof CurrencyCode | SynItem[] | undefined> | undefined,
@@ -159,10 +159,14 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
     }
   }
 
-  protected async trackPageView (_data: PageViewConfig): Promise<void> {
+  protected async trackPageView (data: PageViewConfig): Promise<void> {
     if (window && window.SR && 'SR' in window && 'event' in window.SR) {
       this.reportDebug('trackPageView')
-      window.SR.event.pageVisit()
+      window.SR.event.pageVisit({
+        page_path: data.pagePath,
+        page_title: data.pageTitle,
+        currency: data.currency as string
+      })
     }
   }
 
