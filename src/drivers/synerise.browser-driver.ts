@@ -91,11 +91,13 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
     'add_payment_info',
     'add_to_cart',
     'purchase',
+    'view_cart',
     'view_item',
     'view_item_list',
     'login',
     'sign_up'
   ]
+
   public static AVAILABILITY_CHECK_TIMEOUT = 250
   public static AVAILABILITY_CHECK_MAX_TIMEOUT = 1500
   public name = 'SyneriseBrowserDriver'
