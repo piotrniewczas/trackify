@@ -68,6 +68,7 @@ export interface SubscribeConfig extends AnalyticsEventConfig {
   allow_policy?: string;
   language?: string;
   storeCode?: string;
+  source?: string;
 }
 
 export interface UserDataConfig extends AnalyticsEventConfig {

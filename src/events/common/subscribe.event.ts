@@ -15,7 +15,8 @@ export class SubscribeEvent extends AbstractEvent implements AnalyticsEvent<Subs
       list: this.config.list,
       allow_marketing: this.config.allow_marketing,
       allow_policy: this.config.allow_policy,
-      language: this.config.language
+      language: this.config.language,
+      source: this.config.source
     }
   }
 }

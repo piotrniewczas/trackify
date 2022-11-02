@@ -12,10 +12,11 @@ export class UnsubscribeEvent extends AbstractEvent implements AnalyticsEvent<Su
   getData (): SubscribeConfig {
     return {
       email: this.config.email,
-      list: this.config.list,
+      list: this.config.list ?? '',
       allow_marketing: this.config.allow_marketing,
       allow_policy: this.config.allow_policy,
-      language: this.config.language
+      language: this.config.language ?? '',
+      source: this.config.source ?? ''
     }
   }
 }
