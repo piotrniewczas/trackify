@@ -43,8 +43,11 @@ export type SupportedEvent = AnalyticsEvent<SupportedEventData> | CustomAnalytic
 declare global {
   interface Window {
     SR?: {
+      dynamicContent: {
+        get: () => string
+      },
       event: {
-        pageVisit: (payload: Record<string, string>) => void,
+        pageVisit: (payload: Record<string, string>) => Promise<void>,
         trackCustomEvent: (
           eventName: string,
           payload: Record<string, string | number | keyof typeof CurrencyCode | SynItem[] | undefined> | undefined,
@@ -170,6 +173,10 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
         uri: '/' + data.pagePath,
         title: data.pageTitle,
         currency: data.currency as string
+      }).then(function () {
+        if (window && window.SR && 'SR' in window && 'dynamicContent' in window.SR) {
+          window.SR.dynamicContent.get();
+        }
       })
     }
   }
