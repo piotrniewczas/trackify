@@ -358,7 +358,8 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
     this.sendForm('newsletter-agreement', {
       email: _data.email,
       list: _data.list,
-      newsletterAgreement: _data.allow_marketing,
+      smsOffers: _data.allow_sms_marketing,
+      emailOffers: _data.allow_marketing,
       allowPolicy: _data.allow_policy,
       newsletterLanguage: _data.language
     })

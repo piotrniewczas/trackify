@@ -65,6 +65,7 @@ export interface SubscribeConfig extends AnalyticsEventConfig {
   name?: string;
   list?: string;
   allow_marketing?: string;
+  allow_sms_marketing?: string;
   allow_policy?: string;
   language?: string;
   storeCode?: string;
