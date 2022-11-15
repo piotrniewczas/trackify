@@ -94,6 +94,8 @@ export interface SignUpConfig extends AnalyticsEventConfig {
   email?: string;
   id?: string;
   shop_id?: string;
+  allow_marketing?: string;
+  allow_sms_marketing?: string;
 }
 
 export interface PurchaseConfig extends AnalyticsEventConfig {
