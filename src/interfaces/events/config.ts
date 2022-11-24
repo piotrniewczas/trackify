@@ -38,7 +38,7 @@ export interface BeginCheckoutConfig extends AnalyticsEventConfig {
 }
 
 export interface CustomerConfig extends AnalyticsEventConfig {
-  method: string;
+  method?: string;
   firstname?: string;
   lastname?: string;
   email?: string;
@@ -108,9 +108,7 @@ export interface PurchaseConfig extends AnalyticsEventConfig {
   tax?: number,
   items: Array<Item>,
   discount?: number,
-  customer?: {
-    id?: string | number,
-  }
+  customer?: CustomerConfig
 }
 
 export interface RemoveFromCartConfig extends AnalyticsEventConfig {

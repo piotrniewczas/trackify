@@ -237,6 +237,9 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       tax: data.tax ? this.monetaryValue(data.tax) : undefined,
       items: this.getItems(data)
     })
+    if (data.customer) {
+      this.pushCustomer(data.customer as CustomerConfig)
+    }
   }
 
   protected async trackPrePurchase (data: PurchaseConfig): Promise<void> {
