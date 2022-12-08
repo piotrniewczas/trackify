@@ -282,6 +282,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   protected async trackViewCart (data: ViewCartConfig): Promise<void> {
     this.pushEcommerce('view_cart', {
       currency: data.currency,
+      totalQuantity: data.totalQuantity,
       value: this.monetaryValue(data.value),
       items: this.getItems(data)
     })

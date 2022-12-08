@@ -368,6 +368,7 @@ export default class SyneriseBrowserDriver implements AnalyticsDriver {
   protected async trackViewCart (data: ViewCartConfig): Promise<void> {
     this.push('cart.status', {
       currency: data.currency,
+      totalQuantity: data.totalQuantity,
       value: this.monetaryValue(data.value),
       products: this.getItems(data)
     })
