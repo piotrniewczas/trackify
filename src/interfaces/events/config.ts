@@ -124,6 +124,7 @@ export interface SignUpConfig extends AnalyticsEventConfig {
 export interface ViewCartConfig extends AnalyticsEventConfig {
   currency?: keyof typeof CurrencyCode,
   value: number,
+  totalQuantity: number,
   items: Array<Item>
 }
 
