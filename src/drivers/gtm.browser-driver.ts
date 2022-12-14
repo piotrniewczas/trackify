@@ -184,7 +184,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   }
 
   protected async trackPageView (data: PageViewConfig): Promise<void> {
-    this.pushCommon('page_view', {
+    this.pushCommon(data.customEventName ?? 'page_view', {
       page_path: data.pagePath,
       page_title: data.pageTitle,
       language: data.language,
