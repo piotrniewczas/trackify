@@ -86,7 +86,7 @@ export class Trackify {
       this.drivers.forEach(async (driver: AnalyticsDriver) => {
         if (driver.supportsEvent(event)) {
           try {
-            console.debug('[Trackify.track]: ' + driver.constructor.name)
+            console.debug('[Trackify.track]: ' + driver.name)
             await driver.track(event)
           } catch (error: unknown) {
             this.reportError(error)
