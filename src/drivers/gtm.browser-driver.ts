@@ -15,6 +15,7 @@ import {
 } from '../interfaces/events/config'
 import { CurrencyCode } from '../interfaces/trackify-globals'
 import { isCustomEvent } from '../helpers/fns'
+import { Item } from "../interfaces/events/item";
 
 declare global {
   interface Window {
@@ -317,7 +318,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       indexAdjuster = 1
     }
 
-    const items = Array.isArray(data.items) ? data.items.map((item, iteration) => ({
+    const items = Array.isArray(data.items) ? data.items.map((item: Record<string, string | number | undefined> | Item, iteration: number) => ({
       item_id: item.id,
       item_name: item.name,
       affiliation: item.affiliation,
@@ -401,14 +402,18 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
   private async trackLogin (data: LoginConfig): Promise<void> {
     this.pushCustomer(data)
     this.pushCommon('login', {
-      method: data.method
+      method: data.method,
+      user_id: data.user_id || '',
+      client_id: data.client_id || ''
     })
   }
 
   private async trackSignUp (data: SignUpConfig): Promise<void> {
     this.pushCustomer(data)
     this.pushCommon('sign_up', {
-      method: data.method
+      method: data.method,
+      user_id: data.user_id || '',
+      client_id: data.client_id || ''
     })
   }
 }

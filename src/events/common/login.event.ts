@@ -16,7 +16,8 @@ export class LoginEvent extends AbstractEvent implements AnalyticsEvent<LoginCon
       lastname: this.config.lastname,
       email: this.config.email,
       id: this.config.id,
-      shop_id: this.config.shop_id
+      shop_id: this.config.shop_id,
+      user_id: this.config.user_id
     }
   }
 }

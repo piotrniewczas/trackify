@@ -57,7 +57,9 @@ export interface LoginConfig extends AnalyticsEventConfig {
   lastname?: string;
   email?: string;
   id?: string;
-  shop_id?: string;
+  shop_id?: string; // shop_id when multisite
+  user_id?: string; //sha256 from email
+  client_id?: string; //user id from site
 }
 
 export interface SubscribeConfig extends AnalyticsEventConfig {
@@ -96,6 +98,8 @@ export interface SignUpConfig extends AnalyticsEventConfig {
   shop_id?: string;
   allow_marketing?: string;
   allow_sms_marketing?: string;
+  user_id?: string; //sha256 from email
+  client_id?: string; //user id from site
 }
 
 export interface PurchaseConfig extends AnalyticsEventConfig {
@@ -117,9 +121,6 @@ export interface RemoveFromCartConfig extends AnalyticsEventConfig {
   items: Array<Item>
 }
 
-export interface SignUpConfig extends AnalyticsEventConfig {
-  method: string
-}
 
 export interface ViewCartConfig extends AnalyticsEventConfig {
   currency?: keyof typeof CurrencyCode,
