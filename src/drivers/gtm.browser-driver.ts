@@ -404,7 +404,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
     this.pushCommon('login', {
       method: data.method,
       user_id: data.user_id || '',
-      client_id: data.client_id || ''
+      client_id: data.client_id || data.id || ''
     })
   }
 
