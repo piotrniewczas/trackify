@@ -30,6 +30,7 @@ export default class UsercomBrowserDriver implements AnalyticsDriver {
     'view_item',
     'view_item_list',
     'login',
+    'sign_up',
     'subscribe',
     'unsubscribe'
   ]
@@ -159,6 +160,7 @@ export default class UsercomBrowserDriver implements AnalyticsDriver {
       'Last name': data.lastname,
       email: data.email,
       shop_user_id: data.id,
+      user_id: data.id,
       store_id: data.shop_id
     })
   }
