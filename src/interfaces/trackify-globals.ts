@@ -164,3 +164,13 @@ export interface TrackifyGlobals {
   brand: string | null;
   language: string | null;
 }
+
+export enum PageType {
+  Homepage = 'homepage',
+  Listing = 'listing',
+  Product = 'product',
+  Basket = 'basket',
+  Signup = 'signup',
+  Purchase = 'purchase',
+  Other = 'other',
+}

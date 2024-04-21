@@ -1,4 +1,4 @@
-import { CurrencyCode } from '../trackify-globals'
+import { CurrencyCode, PageType } from '../trackify-globals'
 import { Item } from './item'
 import { AnalyticsEventConfig } from '../analytics-event'
 
@@ -112,7 +112,9 @@ export interface PurchaseConfig extends AnalyticsEventConfig {
   tax?: number,
   items: Array<Item>,
   discount?: number,
-  customer?: CustomerConfig
+  customer?: CustomerConfig,
+  event?: string, // TradeDoubler event ID
+  organization?: string // TradeDoubler organization ID
 }
 
 export interface RemoveFromCartConfig extends AnalyticsEventConfig {
@@ -144,8 +146,9 @@ export interface ViewItemListConfig extends AnalyticsEventConfig {
 export interface PageViewConfig extends AnalyticsEventConfig {
   pagePath: string,
   pageTitle: string,
+  pageType?: PageType,
   language?: string,
   currency?: keyof typeof CurrencyCode,
-  turnOffPageViewForSPA?: number
+  turnOffPageViewForSPA?: number,
   customEventName?: string
 }
