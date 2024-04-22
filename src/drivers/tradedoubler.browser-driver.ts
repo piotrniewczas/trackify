@@ -112,7 +112,7 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
 
     switch (event.name) {
       case 'page_view':
-        return await this.trackPageView(data as PageViewConfig)
+        return await this.trackPageView()
       case 'add_payment_info':
         return await this.trackAddPaymentInfo(data as AddPaymentInfoConfig)
       case 'add_to_cart':
@@ -138,7 +138,7 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
     }
   }
 
-  protected async trackPageView (data: PageViewConfig): Promise<void> {
+  protected async trackPageView (): Promise<void> {
     if (window && window.TDConf && 'TDConf' in window && window.TDConf.execTag && window.TDConf.Config) {
       this.reportDebug('trackPageView')
 
@@ -292,7 +292,7 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
   private async trackLogin (_data: LoginConfig): Promise<void> {
     //
   }
-  
+
   private async trackSignUp (_data: SignUpConfig): Promise<void> {
     if (window && window.TDConf && 'TDConf' in window) {
       this.setPageType(PageType.Signup)
