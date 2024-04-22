@@ -142,8 +142,10 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
     if (window && window.TDConf && 'TDConf' in window && window.TDConf.execTag && window.TDConf.Config) {
       this.reportDebug('trackPageView')
 
-      if (![PageType.Basket, PageType.Purchase, PageType.Product, PageType.Listing, PageType.Signup].includes(window.TDConf.Config.pageType)) {
-        this.setPageType(data.pageType ?? PageType.Other)
+      const pageType = window.TDConf.Config.pageType || PageType.Other
+
+      if (![PageType.Basket, PageType.Purchase, PageType.Product, PageType.Listing, PageType.Signup].includes(pageType)) {
+        this.setPageType(pageType)
       }
 
       if (!window.TDConf.Config.pageType) {
