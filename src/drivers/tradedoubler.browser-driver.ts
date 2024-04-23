@@ -40,7 +40,7 @@ export type SupportedEvent = AnalyticsEvent<SupportedEventData> | CustomAnalytic
 export interface TradeDoublerItem extends Record<string, unknown> {
   id: string,
   price: string,
-  currency?: keyof typeof CurrencyCode,
+  currency: string,
   name: string,
   qty: string
 }
@@ -142,9 +142,9 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
     if (window && window.TDConf && 'TDConf' in window && window.TDConf.execTag && window.TDConf.Config) {
       this.reportDebug('trackPageView')
 
-      const pageType = window.TDConf.Config.pageType || PageType.Other
+      const pageType = window.TDConf.Config.pageType || data.pageType || PageType.Other
 
-      if (![PageType.Basket, PageType.Purchase, PageType.Product, PageType.Listing, PageType.Signup].includes(pageType)) {
+      if ([PageType.Homepage, PageType.Other].includes(pageType)) {
         this.setPageType(pageType)
       }
 
@@ -152,8 +152,8 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
         throw new TypeError(`PageType should be defined`)
       }
 
-      this.clearConfig()
       window.TDConf.execTag(window.TDConf.Config.pageType)
+      this.resetConfig()
     }
   }
 
@@ -165,9 +165,9 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
         return {
           id: item.id,
           price: `${item.price ? this.monetaryValue(item.price as number) : 0}`,
-          currency: item.currency,
+          currency: item.currency ?? '',
           name: item.name,
-          qty: `${item.quantity ?? 0}`
+          qty: `${item.quantity ?? ''}`
         }
       })
     }
@@ -191,15 +191,9 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
     }
   }
 
-  protected clearConfig (): void {
-    if (window && window.TDConf && 'TDConf' in window && window.TDConf.Config && window.TDConf.Config.pageType) {
-      if (window.TDConf.Config.pageType !== PageType.Purchase) {
-        delete window.TDConf.Config.orderId
-        delete window.TDConf.Config.orderValue
-      }
-      if (![PageType.Purchase, PageType.Basket, PageType.Product, PageType.Listing].includes(window.TDConf.Config.pageType)) {
-        delete window.TDConf.Config.products
-      }
+  protected resetConfig (): void {
+    if (window && window.TDConf && 'TDConf' in window && window.TDConf.Config) {
+      window.TDConf.Config = {};
     }
   }
 
@@ -263,7 +257,7 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
 
       if (tduid) {
         const img = document.createElement('img')
-        img.src = `https://imgstatic.eu/report?o=${organization}&e=${event}&ordnum=${orderNumber}&ordval=${orderValue}&curr=${currency}&tduid=${tduid}`
+        img.src = `${scheme}://imgstatic.eu/report?o=${organization}&e=${event}&ordnum=${orderNumber}&ordval=${orderValue}&curr=${currency}&tduid=${tduid}`
         document.body.appendChild(img)
       }
     }
@@ -294,9 +288,7 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
   }
   
   private async trackSignUp (_data: SignUpConfig): Promise<void> {
-    if (window && window.TDConf && 'TDConf' in window) {
-      this.setPageType(PageType.Signup)
-    }
+    this.setPageType(PageType.Signup)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -315,19 +307,15 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
   }
 
   protected async trackViewCart (data: ViewCartConfig): Promise<void> {
-    if (window && window.TDConf && 'TDConf' in window) {
-      this.setProducts(data.items)
-      this.setPageType(PageType.Basket)
-    }
+    this.setProducts(data.items)
+    this.setPageType(PageType.Basket)
   }
 
   private async trackPurchase (data: PurchaseConfig): Promise<void> {
     this.createTradeDoublerConversionPixel(data);
-    if (window && window.TDConf && 'TDConf' in window && window.TDConf.Config) {
-      this.setOrder(data.transactionId, data.value)
-      this.setProducts(data.items)
-      this.setPageType(PageType.Purchase)
-    }
+    this.setOrder(data.transactionId, data.value)
+    this.setProducts(data.items)
+    this.setPageType(PageType.Purchase)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -336,16 +324,12 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
   }
 
   private async trackViewItem (data: ViewItemConfig): Promise<void> {
-    if (window && window.TDConf && 'TDConf' in window) {
-      this.setProducts(data.items)
-      this.setPageType(PageType.Product)
-    }
+    this.setProducts(data.items)
+    this.setPageType(PageType.Product)
   }
 
   private async trackViewItemList (data: ViewItemListConfig): Promise<void> {
-    if (window && window.TDConf && 'TDConf' in window) {
-      this.setProducts(data.items)
-      this.setPageType(PageType.Listing)
-    }
+    this.setProducts(data.items)
+    this.setPageType(PageType.Listing)
   }
 }
