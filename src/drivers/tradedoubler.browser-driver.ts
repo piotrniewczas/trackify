@@ -1,6 +1,6 @@
 import { AnalyticsDriver } from '../interfaces/analytics-driver'
 import { AnalyticsEvent, CustomAnalyticsEvent } from '../interfaces/analytics-event'
-import { CurrencyCode, PageType } from '../interfaces/trackify-globals'
+import { PageType } from '../interfaces/trackify-globals'
 
 import {
   AddPaymentInfoConfig,
@@ -112,7 +112,7 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
 
     switch (event.name) {
       case 'page_view':
-        return await this.trackPageView()
+        return await this.trackPageView(data as PageViewConfig)
       case 'add_payment_info':
         return await this.trackAddPaymentInfo(data as AddPaymentInfoConfig)
       case 'add_to_cart':
@@ -138,7 +138,7 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
     }
   }
 
-  protected async trackPageView (): Promise<void> {
+  protected async trackPageView (data: PageViewConfig): Promise<void> {
     if (window && window.TDConf && 'TDConf' in window && window.TDConf.execTag && window.TDConf.Config) {
       this.reportDebug('trackPageView')
 
