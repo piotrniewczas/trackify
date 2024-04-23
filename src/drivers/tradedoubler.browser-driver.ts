@@ -1,6 +1,6 @@
 import { AnalyticsDriver } from '../interfaces/analytics-driver'
 import { AnalyticsEvent, CustomAnalyticsEvent } from '../interfaces/analytics-event'
-import { CurrencyCode, PageType } from '../interfaces/trackify-globals'
+import { PageType } from '../interfaces/trackify-globals'
 
 import {
   AddPaymentInfoConfig,
@@ -80,6 +80,8 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
   public static AVAILABILITY_CHECK_MAX_TIMEOUT = 1500
   public name = 'TradeDoublerBrowserDriver'
 
+  private skipPageTypeSetting = false
+
   public async load (): Promise<boolean> {
     try {
       this.reportDebug('[TradeDoubler] Load')
@@ -100,8 +102,8 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
     }
   }
 
-  public supportsEvent (event: AnalyticsEvent<unknown>): boolean {
-    return TradeDoublerBrowserDriver.SUPPORTED_EVENTS.includes(event.name) || event.name.indexOf('custom.') >= 0
+  public supportsEvent(event: AnalyticsEvent<unknown>): boolean {
+    return TradeDoublerBrowserDriver.SUPPORTED_EVENTS.includes(event.name)
   }
 
   public async track (event: AnalyticsEvent<unknown>): Promise<void> {
@@ -142,10 +144,10 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
     if (window && window.TDConf && 'TDConf' in window && window.TDConf.execTag && window.TDConf.Config) {
       this.reportDebug('trackPageView')
 
-      const pageType = window.TDConf.Config.pageType || data.pageType || PageType.Other
-
-      if ([PageType.Homepage, PageType.Other].includes(pageType)) {
-        this.setPageType(pageType)
+      // pageType should be set using the track previous events, if it is not - get it from a payload
+      if (!this.skipPageTypeSetting) {
+        this.resetConfig()
+        this.setPageType(data.pageType || PageType.Other)
       }
 
       if (!window.TDConf.Config.pageType) {
@@ -153,7 +155,7 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
       }
 
       window.TDConf.execTag(window.TDConf.Config.pageType)
-      this.resetConfig()
+      this.skipPageTypeSetting = false
     }
   }
 
@@ -288,7 +290,9 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
   }
   
   private async trackSignUp (_data: SignUpConfig): Promise<void> {
+    this.resetConfig()
     this.setPageType(PageType.Signup)
+    this.skipPageTypeSetting = true
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -307,15 +311,19 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
   }
 
   protected async trackViewCart (data: ViewCartConfig): Promise<void> {
+    this.resetConfig()
     this.setProducts(data.items)
     this.setPageType(PageType.Basket)
+    this.skipPageTypeSetting = true
   }
 
   private async trackPurchase (data: PurchaseConfig): Promise<void> {
+    this.resetConfig()
     this.createTradeDoublerConversionPixel(data);
     this.setOrder(data.transactionId, data.value)
     this.setProducts(data.items)
     this.setPageType(PageType.Purchase)
+    this.skipPageTypeSetting = true
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -324,12 +332,16 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
   }
 
   private async trackViewItem (data: ViewItemConfig): Promise<void> {
+    this.resetConfig()
     this.setProducts(data.items)
     this.setPageType(PageType.Product)
+    this.skipPageTypeSetting = true
   }
 
   private async trackViewItemList (data: ViewItemListConfig): Promise<void> {
+    this.resetConfig()
     this.setProducts(data.items)
     this.setPageType(PageType.Listing)
+    this.skipPageTypeSetting = true
   }
 }
