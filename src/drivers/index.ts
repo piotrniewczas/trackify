@@ -1,5 +1,5 @@
 import { AnalyticsDriverConstructor, AnalyticsDriverToken } from '../interfaces/analytics-driver'
-import { TRACKIFY_DEBUG, TRACKIFY_GTM, TRACKIFY_USERCOM, TRACKIFY_SYNERISE, TRACKIFY_TRADEDOUBLER,  } from '../tokens'
+import { TRACKIFY_DEBUG, TRACKIFY_GTM, TRACKIFY_USERCOM, TRACKIFY_SYNERISE, TRACKIFY_TRADEDOUBLER, TRACKIFY_CENEO,  } from '../tokens'
 import { isBrowser } from '../helpers/fns'
 
 export const analyticsDrivers: Map<AnalyticsDriverToken, () => Promise<AnalyticsDriverConstructor>> = new Map<AnalyticsDriverToken, () => Promise<AnalyticsDriverConstructor>>(
@@ -28,5 +28,10 @@ export const analyticsDrivers: Map<AnalyticsDriverToken, () => Promise<Analytics
       TRACKIFY_TRADEDOUBLER,
       () => isBrowser() ? import('./tradedoubler.browser-driver').then(module => module.default)
         : import('./tradedoubler.server-driver').then(module => module.default)
+    ],
+    [
+      TRACKIFY_CENEO,
+      () => isBrowser() ? import('./ceneo.browser-driver').then(module => module.default)
+        : import('./ceneo.server-driver').then(module => module.default)
     ]
   ])
