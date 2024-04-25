@@ -22,7 +22,9 @@ export class PrePurchaseEvent extends AbstractSalesEvent implements AnalyticsEve
       discount: this.config.discount,
       customer: this.config.customer ? {
         id: this.config.customer.id
-      } : undefined
+      } : undefined,
+      event: this.config.event,
+      organization: this.config.organization
     }
   }
 }
