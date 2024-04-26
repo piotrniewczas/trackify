@@ -230,14 +230,24 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
     document.body.appendChild(ifrm)
   }
 
-  protected createTradeDoublerConversionPixel (
+  protected async hashCustomerEmail (email: string) {
+    const utf8 = new TextEncoder().encode(email);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray
+      .map((bytes) => bytes.toString(16).padStart(2, '0'))
+      .join('');
+    return hashHex;
+  }
+
+  protected async createTradeDoublerConversionPixel (
     payload: PurchaseConfig,
-  ): void {
+  ): Promise<void> {
     if (window && window.document) {
       // A unique identifier for the transaction. For a sale, this is typically the order number.
       const orderNumber = payload.transactionId
       // Value of the sale.
-      const orderValue = this.monetaryValue(payload.value)
+      const orderNetValue = this.monetaryValue(payload.value - (payload.tax ?? 0))
       // Currency of the sale.
       const currency = payload.currency
       // Transmit a list of items ordered in the reportInfo parameter.
@@ -253,13 +263,14 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
       const checkNumberName = "orderNumber"
       const scheme = "https"
       const { organization, event } = payload
-      const trackBackUrl = `${scheme}://${domain}/report?organization=${organization}&event=${event}&${checkNumberName}=${orderNumber}&orderValue=${orderValue}&currency=${currency}&voucher=${voucher}&tduid=${tduid}&type=iframe&reportInfo=${encodeURIComponent(reportInfo)}`
+      const hashedEmailAddress = await this.hashCustomerEmail(payload.customer?.email ?? '')
+      const trackBackUrl = `${scheme}://${domain}/report?organization=${organization}&event=${event}&${checkNumberName}=${orderNumber}&orderValue=${orderNetValue}&extid=${hashedEmailAddress}&exttype=1&currency=${currency}&voucher=${voucher}&tduid=${tduid}&type=iframe&reportInfo=${encodeURIComponent(reportInfo)}`
 
       this.prepareFrame(trackBackUrl)
 
       if (tduid) {
         const img = document.createElement('img')
-        img.src = `${scheme}://imgstatic.eu/report?o=${organization}&e=${event}&ordnum=${orderNumber}&ordval=${orderValue}&curr=${currency}&tduid=${tduid}`
+        img.src = `${scheme}://imgstatic.eu/report?o=${organization}&e=${event}&ordnum=${orderNumber}&ordval=${orderNetValue}&curr=${currency}&tduid=${tduid}`
         document.body.appendChild(img)
       }
     }
