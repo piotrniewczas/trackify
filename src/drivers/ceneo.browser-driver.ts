@@ -187,7 +187,7 @@ export default class CeneoBrowserDriver implements AnalyticsDriver {
           }
         }),
         work_days_to_send_questionnaire: 3,
-        amount: this.monetaryValue(data.value)
+        amount: this.monetaryValue(data.value + (data.discount ?? 0))
       });
     }
   }
