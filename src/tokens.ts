@@ -6,3 +6,4 @@ export const TRACKIFY_USERCOM: AnalyticsDriverToken = Symbol.for('TRACKIFY_USERC
 export const TRACKIFY_SYNERISE: AnalyticsDriverToken = Symbol.for('TRACKIFY_SYNERISE')
 export const TRACKIFY_TRADEDOUBLER: AnalyticsDriverToken = Symbol.for('TRACKIFY_TRADEDOUBLER')
 export const TRACKIFY_CENEO: AnalyticsDriverToken = Symbol.for('TRACKIFY_CENEO')
+export const TRACKIFY_GETRESPONSE: AnalyticsDriverToken = Symbol.for('TRACKIFY_GETRESPONSE')
