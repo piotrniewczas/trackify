@@ -1,6 +1,6 @@
-import { AnalyticsDriver } from '../interfaces/analytics-driver'
-import { AnalyticsEvent, CustomAnalyticsEvent } from '../interfaces/analytics-event'
-import { PageType } from '../interfaces/trackify-globals'
+import {AnalyticsDriver} from '../interfaces/analytics-driver'
+import {AnalyticsEvent, CustomAnalyticsEvent} from '../interfaces/analytics-event'
+import {PageType} from '../interfaces/trackify-globals'
 
 import {
   AddPaymentInfoConfig,
@@ -18,7 +18,7 @@ import {
   ViewItemConfig,
   ViewItemListConfig
 } from '../interfaces/events/config'
-import { Item } from '../interfaces/events/item';
+import {Item} from '../interfaces/events/item';
 
 export type SupportedEventData =
   PageViewConfig
@@ -199,7 +199,7 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
     }
   }
 
-  protected getCookieTD (name: string) {
+  protected getCookieTD (name: string): string | null {
     const dc = document.cookie
     const prefix = name + "="
     let begin = dc.indexOf("; " + prefix)
@@ -221,7 +221,7 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
     return decodeURIComponent(dc.substring(begin + prefix.length, end))
   }
 
-  protected prepareFrame (tburl: string) {
+  protected prepareFrame (tburl: string): void {
     const ifrm = document.createElement("IFRAME")
     ifrm.setAttribute("src", tburl)
     ifrm.style.width = 1 + "px"
@@ -230,14 +230,13 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
     document.body.appendChild(ifrm)
   }
 
-  protected async hashCustomerEmail (email: string) {
+  protected async hashCustomerEmail (email: string): Promise<string> {
     const utf8 = new TextEncoder().encode(email);
     const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray
+    return hashArray
       .map((bytes) => bytes.toString(16).padStart(2, '0'))
       .join('');
-    return hashHex;
   }
 
   protected async createTradeDoublerConversionPixel (
@@ -300,6 +299,7 @@ export default class TradeDoublerBrowserDriver implements AnalyticsDriver {
     //
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private async trackSignUp (_data: SignUpConfig): Promise<void> {
     this.resetConfig()
     this.setPageType(PageType.Signup)
