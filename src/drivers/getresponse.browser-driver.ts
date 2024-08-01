@@ -10,9 +10,11 @@ import {
   ViewItemConfig, ViewItemListConfig
 } from '../interfaces/events/config'
 
+type GrTrackingPayload = Record<string, string | number | boolean | null | undefined>;
+
 declare global {
   interface Window {
-    GrTracking?: (action: string, payload?: string | Record<string, string | number | boolean | null | undefined>) => void;
+    GrTracking?: ((action: string, payload?: GrTrackingPayload | string) => void) & ((action: string, event: string, payload?: GrTrackingPayload) => void);
   }
 }
 
@@ -83,8 +85,8 @@ export default class GetResponseBrowserDriver implements AnalyticsDriver {
   }
 
   protected async trackPageView(data: PageViewConfig): Promise<void> {
-    this.push('page_view', {
-      URL: data.pagePath
+    this.push('setEvent', 'page_view', {
+      url: data.pagePath
     })
   }
 
@@ -98,22 +100,26 @@ export default class GetResponseBrowserDriver implements AnalyticsDriver {
       throw new TypeError(`Custom event ${event.name} has to provide event name for ${this.name} [forDriver.event_name]`)
     }
 
-    if (data.event_payload && (typeof data.event_payload !== 'object' || typeof data.event_payload !== 'string')) {
+    if (data.event_payload && (typeof data.event_payload !== 'object')) {
       throw new TypeError(`Custom event ${event.name} has to provide event payload for ${this.name} [forDriver.event_payload]`)
     }
 
     return this.push(
+      'setEvent',
       data.event_name,
-      data.event_payload as string | Record<string, string | number | undefined>
+      data.event_payload as GrTrackingPayload | undefined
     )
   }
 
-  protected push(
-    eventName: string,
-    payload?: string | Record<string, string | number | undefined>
-  ): void {
+  protected push(action: string, payload?: GrTrackingPayload | string): void;
+  protected push(action: string, event: string, payload?: GrTrackingPayload): void;
+  protected push(action: string, eventOrPayload?: string | GrTrackingPayload, payload?: GrTrackingPayload): void {
     if (window.GrTracking) {
-      window.GrTracking(eventName, payload)
+      if (typeof eventOrPayload === 'string') {
+        window.GrTracking(action, eventOrPayload, payload)
+      } else {
+        window.GrTracking(action, eventOrPayload)
+      }
     }
   }
 
@@ -135,15 +141,15 @@ export default class GetResponseBrowserDriver implements AnalyticsDriver {
   }
 
   private async trackLogin(data: LoginConfig): Promise<void> {
-    this.push('sign_in', {method: data.method})
+    this.push('setEvent', 'sign_in', {method: data.method})
   }
 
   private async trackSignUp(data: SignUpConfig): Promise<void> {
     if (data.email) {
       await GetResponseBrowserDriver.setUserId(data.email)
     }
-    this.push('sign_in', {method: data.method})
-    this.push('update', {
+    this.push('setEvent', 'sign_in', {method: data.method})
+    this.push('setEvent', 'update', {
       first_name: data.firstname,
       last_name: data.lastname,
       email: data.email,
@@ -156,7 +162,7 @@ export default class GetResponseBrowserDriver implements AnalyticsDriver {
     if (data.email) {
       await GetResponseBrowserDriver.setUserId(data.email)
     }
-    this.push('update', {
+    this.push('setEvent', 'update', {
       first_name: data.firstname,
       last_name: data.lastname,
       email: data.email,
@@ -170,8 +176,8 @@ export default class GetResponseBrowserDriver implements AnalyticsDriver {
     if (data.customer?.email) {
       await GetResponseBrowserDriver.setUserId(data.customer.email)
     }
-    this.push('checkout_data_step')
-    this.push('update', {
+    this.push('setEvent', 'checkout_data_step')
+    this.push('setEvent', 'update', {
       first_name: data.customer?.firstname,
       last_name: data.customer?.lastname,
       email: data.customer?.email,
@@ -180,7 +186,7 @@ export default class GetResponseBrowserDriver implements AnalyticsDriver {
   }
 
   private async trackPurchase(data: PurchaseConfig): Promise<void> {
-    this.push('purchase', {
+    this.push('setEvent', 'purchase', {
       user_id: data.customer?.id,
       order_id: data.transactionId,
       total: data.value,
@@ -193,7 +199,7 @@ export default class GetResponseBrowserDriver implements AnalyticsDriver {
     })
 
     data.items.forEach(item => {
-      this.push('product_event', {
+      this.push('setEvent', 'product_event', {
         event_type: 'purchase',
         list: item.listId,
         product_id: item.sku,
@@ -222,7 +228,7 @@ export default class GetResponseBrowserDriver implements AnalyticsDriver {
 
   private async trackAddToCart(data: AddToCartConfig): Promise<void> {
     data.items.forEach(item => {
-      this.push('product_event', {
+      this.push('setEvent', 'product_event', {
         event_type: 'add_to_cart',
         list: item.listId,
         product_id: item.sku,
@@ -251,7 +257,7 @@ export default class GetResponseBrowserDriver implements AnalyticsDriver {
 
   private async trackViewItem(data: ViewItemConfig): Promise<void> {
     data.items.forEach(item => {
-      this.push('product_event', {
+      this.push('setEvent', 'product_event', {
         event_type: 'view',
         list: item.listId,
         product_id: item.sku,
@@ -280,7 +286,7 @@ export default class GetResponseBrowserDriver implements AnalyticsDriver {
 
   private async trackViewItemList (data: ViewItemListConfig): Promise<void> {
     data.items.forEach(item => {
-      this.push('product_event', {
+      this.push('setEvent', 'product_event', {
         event_type: 'view_list',
         list: item.listId,
         product_id: item.sku,
@@ -310,7 +316,7 @@ export default class GetResponseBrowserDriver implements AnalyticsDriver {
   private static async subscribe (_data: SubscribeConfig): Promise<void> {
     if (window.GrTracking) {
       await this.setUserId(_data.email)
-      window.GrTracking('subscribe', {
+      window.GrTracking('setEvent', 'subscribe', {
         email: _data.email,
         list: _data.list,
         newsletterAgreement: _data.allow_marketing,
@@ -324,7 +330,7 @@ export default class GetResponseBrowserDriver implements AnalyticsDriver {
   private static async unsubscribe (_data: SubscribeConfig): Promise<void> {
     if (window.GrTracking) {
       await this.setUserId(_data.email)
-      window.GrTracking('unsubscribe', {
+      window.GrTracking('setEvent', 'unsubscribe', {
         email: _data.email
       })
     }
