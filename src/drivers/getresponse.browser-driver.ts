@@ -104,6 +104,11 @@ export default class GetResponseBrowserDriver implements AnalyticsDriver {
       throw new TypeError(`Custom event ${event.name} has to provide event payload for ${this.name} [forDriver.event_payload]`)
     }
 
+    const email: string | undefined = (data.event_payload as { email?: string })?.email;
+    if (email?.length) {
+      await GetResponseBrowserDriver.setUserId(email);
+    }
+
     return this.push(
       'setEvent',
       data.event_name,
@@ -199,8 +204,7 @@ export default class GetResponseBrowserDriver implements AnalyticsDriver {
     })
 
     data.items.forEach(item => {
-      this.push('setEvent', 'product_event', {
-        event_type: 'purchase',
+      this.push('setEvent', 'product_purchase', {
         list: item.listId,
         product_id: item.sku,
         name: item.name,
@@ -228,8 +232,7 @@ export default class GetResponseBrowserDriver implements AnalyticsDriver {
 
   private async trackAddToCart(data: AddToCartConfig): Promise<void> {
     data.items.forEach(item => {
-      this.push('setEvent', 'product_event', {
-        event_type: 'add_to_cart',
+      this.push('setEvent', 'product_add_to_cart', {
         list: item.listId,
         product_id: item.sku,
         name: item.name,
@@ -257,8 +260,7 @@ export default class GetResponseBrowserDriver implements AnalyticsDriver {
 
   private async trackViewItem(data: ViewItemConfig): Promise<void> {
     data.items.forEach(item => {
-      this.push('setEvent', 'product_event', {
-        event_type: 'view',
+      this.push('setEvent', 'product_view', {
         list: item.listId,
         product_id: item.sku,
         name: item.name,
@@ -286,8 +288,7 @@ export default class GetResponseBrowserDriver implements AnalyticsDriver {
 
   private async trackViewItemList (data: ViewItemListConfig): Promise<void> {
     data.items.forEach(item => {
-      this.push('setEvent', 'product_event', {
-        event_type: 'view_list',
+      this.push('setEvent', 'product_list', {
         list: item.listId,
         product_id: item.sku,
         name: item.name,
