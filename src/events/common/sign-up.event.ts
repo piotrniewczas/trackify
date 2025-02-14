@@ -21,6 +21,7 @@ export class SignUpEvent extends AbstractEvent implements AnalyticsEvent<SignUpC
       client_id: this.config.client_id,
       allow_marketing: this.config.allow_marketing,
       allow_sms_marketing: this.config.allow_sms_marketing,
+      ...(this.config.eventId ? { eventId: this.config.eventId} : {}),
     }
   }
 }

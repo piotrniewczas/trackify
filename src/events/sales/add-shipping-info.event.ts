@@ -16,6 +16,7 @@ export class AddShippingInfoEvent extends AbstractSalesEvent implements Analytic
       coupon: this.config.coupon,
       shippingTier: this.config.shippingTier,
       items: Array.isArray(this.config.items) ? this.config.items.map(item => ({...item})) : [],
+      ...(this.config.eventId ? { eventId: this.config.eventId} : {}),
     };
   }
 }

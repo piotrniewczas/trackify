@@ -17,7 +17,8 @@ export class UnsubscribeEvent extends AbstractEvent implements AnalyticsEvent<Su
       allow_sms_marketing: this.config.allow_sms_marketing,
       allow_policy: this.config.allow_policy,
       language: this.config.language ?? '',
-      source: this.config.source ?? ''
+      source: this.config.source ?? '',
+      ...(this.config.eventId ? { eventId: this.config.eventId} : {}),
     }
   }
 }

@@ -24,7 +24,8 @@ export class TypPurchaseEvent extends AbstractSalesEvent implements AnalyticsEve
         id: this.config.customer.id
       } : undefined,
       event: this.config.event,
-      organization: this.config.organization
+      organization: this.config.organization,
+      ...(this.config.eventId ? { eventId: this.config.eventId} : {}),
     }
   }
 }
