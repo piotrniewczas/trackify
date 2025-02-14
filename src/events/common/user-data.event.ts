@@ -17,7 +17,8 @@ export class UserDataEvent extends AbstractEvent implements AnalyticsEvent<UserD
       firstname: this.config.firstname,
       lastname: this.config.lastname,
       dateOfBirth: this.config.dateOfBirth,
-      phone: this.config.phone
+      phone: this.config.phone,
+      ...(this.config.eventId ? { eventId: this.config.eventId} : {}),
     }
   }
 }

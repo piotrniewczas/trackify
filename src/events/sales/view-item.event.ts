@@ -14,6 +14,7 @@ export class ViewItemEvent extends AbstractSalesEvent implements AnalyticsEvent<
       currency: this.config.currency,
       value: this.config.value,
       items: Array.isArray(this.config.items) ? this.config.items.map(item => ({...item})) : [],
+      ...(this.config.eventId ? { eventId: this.config.eventId} : {}),
     }
   }
 }

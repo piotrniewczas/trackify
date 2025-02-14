@@ -22,7 +22,8 @@ export class PurchaseEvent extends AbstractSalesEvent implements AnalyticsEvent<
       discount: this.config.discount,
       customer: this.config.customer ?? undefined,
       event: this.config.event,
-      organization: this.config.organization
+      organization: this.config.organization,
+      ...(this.config.eventId ? { eventId: this.config.eventId} : {}),
     }
   }
 }

@@ -15,6 +15,7 @@ export class BeginCheckoutEvent extends AbstractSalesEvent implements AnalyticsE
       value: this.config.value,
       coupon: this.config.coupon,
       items: Array.isArray(this.config.items) ? this.config.items.map(item => ({...item})) : [],
+      ...(this.config.eventId ? { eventId: this.config.eventId} : {}),
     }
   }
 }

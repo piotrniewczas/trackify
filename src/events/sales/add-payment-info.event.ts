@@ -21,7 +21,8 @@ export class AddPaymentInfoEvent extends AbstractSalesEvent implements Analytics
         lastname: this.config.customer?.lastname,
         email: this.config.customer?.email,
         telephone: this.config.customer?.telephone
-      } : undefined
+      } : undefined,
+      ...(this.config.eventId ? { eventId: this.config.eventId} : {}),
     };
   }
 }

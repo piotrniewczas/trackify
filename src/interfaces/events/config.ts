@@ -14,6 +14,7 @@ export interface AddPaymentInfoConfig extends AnalyticsEventConfig {
     email?: string;
     telephone?: string;
   }
+  eventId?: string
 }
 
 export interface AddShippingInfoConfig extends AnalyticsEventConfig {
@@ -22,12 +23,14 @@ export interface AddShippingInfoConfig extends AnalyticsEventConfig {
   coupon?: string,
   shippingTier?: string,
   items: Array<Item>,
+  eventId?: string
 }
 
 export interface AddToCartConfig extends AnalyticsEventConfig {
   currency?: keyof typeof CurrencyCode,
   value: number,
   items: Array<Item>
+  eventId?: string
 }
 
 export interface BeginCheckoutConfig extends AnalyticsEventConfig {
@@ -35,6 +38,7 @@ export interface BeginCheckoutConfig extends AnalyticsEventConfig {
   value: number,
   coupon?: string,
   items: Array<Item>
+  eventId?: string
 }
 
 export interface CustomerConfig extends AnalyticsEventConfig {
@@ -49,6 +53,7 @@ export interface CustomerConfig extends AnalyticsEventConfig {
   province?: string;
   zipCode?: string;
   country?: string;
+  eventId?: string
 }
 
 export interface LoginConfig extends AnalyticsEventConfig {
@@ -60,6 +65,7 @@ export interface LoginConfig extends AnalyticsEventConfig {
   shop_id?: string; // shop_id when multisite
   user_id?: string; //sha256 from email
   client_id?: string; //user id from site
+  eventId?: string
 }
 
 export interface SubscribeConfig extends AnalyticsEventConfig {
@@ -72,6 +78,7 @@ export interface SubscribeConfig extends AnalyticsEventConfig {
   language?: string;
   storeCode?: string;
   source?: string;
+  eventId?: string
 }
 
 export interface UserDataConfig extends AnalyticsEventConfig {
@@ -87,6 +94,7 @@ export interface UserDataConfig extends AnalyticsEventConfig {
   country?: string;
   city?: string;
   province?: string;
+  eventId?: string
 }
 
 export interface SignUpConfig extends AnalyticsEventConfig {
@@ -100,6 +108,7 @@ export interface SignUpConfig extends AnalyticsEventConfig {
   allow_sms_marketing?: string;
   user_id?: string; //sha256 from email
   client_id?: string; //user id from site
+  eventId?: string
 }
 
 export interface PurchaseConfig extends AnalyticsEventConfig {
@@ -115,32 +124,36 @@ export interface PurchaseConfig extends AnalyticsEventConfig {
   customer?: CustomerConfig,
   event?: string, // TradeDoubler event ID
   organization?: string // TradeDoubler organization ID
+  eventId?: string
 }
 
 export interface RemoveFromCartConfig extends AnalyticsEventConfig {
   currency?: keyof typeof CurrencyCode,
   value: number,
   items: Array<Item>
+  eventId?: string
 }
-
 
 export interface ViewCartConfig extends AnalyticsEventConfig {
   currency?: keyof typeof CurrencyCode,
   value: number,
   totalQuantity: number,
   items: Array<Item>
+  eventId?: string
 }
 
 export interface ViewItemConfig extends AnalyticsEventConfig {
   currency?: keyof typeof CurrencyCode,
   value: number,
   items: Array<Item>
+  eventId?: string
 }
 
 export interface ViewItemListConfig extends AnalyticsEventConfig {
   listId: string,
   listName: string,
   items: Array<Item>
+  eventId?: string
 }
 
 export interface PageViewConfig extends AnalyticsEventConfig {
@@ -151,4 +164,5 @@ export interface PageViewConfig extends AnalyticsEventConfig {
   currency?: keyof typeof CurrencyCode,
   turnOffPageViewForSPA?: number,
   customEventName?: string
+  eventId?: string
 }
