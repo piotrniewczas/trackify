@@ -189,7 +189,8 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       page_path: data.pagePath,
       page_title: data.pageTitle,
       language: data.language,
-      currency: data.currency
+      currency: data.currency,
+      ...(data.eventId ? { event_id: data.eventId} : {}),
     })
   }
 
@@ -199,7 +200,8 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       value: this.monetaryValue(data.value),
       coupon: data.coupon,
       payment_type: data.paymentMethod,
-      items: this.getItems(data)
+      items: this.getItems(data),
+      ...(data.eventId ? { event_id: data.eventId} : {}),
     })
   }
 
@@ -209,7 +211,8 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       value: this.monetaryValue(data.value),
       coupon: data.coupon,
       shipping_tier: data.shippingTier,
-      items: this.getItems(data)
+      items: this.getItems(data),
+      ...(data.eventId ? { event_id: data.eventId} : {}),
     })
   }
 
@@ -217,7 +220,8 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
     this.pushEcommerce('add_to_cart', {
       currency: data.currency,
       value: this.monetaryValue(data.value),
-      items: this.getItems(data)
+      items: this.getItems(data),
+      ...(data.eventId ? { event_id: data.eventId} : {}),
     })
   }
 
@@ -226,7 +230,8 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       currency: data.currency,
       value: this.monetaryValue(data.value),
       coupon: data.coupon,
-      items: this.getItems(data)
+      items: this.getItems(data),
+      ...(data.eventId ? { event_id: data.eventId} : {}),
     })
   }
 
@@ -239,7 +244,8 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       coupon: data.coupon,
       shipping: data.shipping ? this.monetaryValue(data.shipping) : undefined,
       tax: data.tax ? this.monetaryValue(data.tax) : undefined,
-      items: this.getItems(data)
+      items: this.getItems(data),
+      ...(data.eventId ? { event_id: data.eventId} : {}),
     })
     if (data.customer) {
       this.pushCustomer(data.customer as CustomerConfig)
@@ -255,7 +261,8 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       coupon: data.coupon,
       shipping: data.shipping ? this.monetaryValue(data.shipping) : undefined,
       tax: data.tax ? this.monetaryValue(data.tax) : undefined,
-      items: this.getItems(data)
+      items: this.getItems(data),
+      ...(data.eventId ? { event_id: data.eventId} : {}),
     })
   }
 
@@ -268,7 +275,8 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       coupon: data.coupon,
       shipping: data.shipping ? this.monetaryValue(data.shipping) : undefined,
       tax: data.tax ? this.monetaryValue(data.tax) : undefined,
-      items: this.getItems(data)
+      items: this.getItems(data),
+      ...(data.eventId ? { event_id: data.eventId} : {}),
     })
   }
 
@@ -276,7 +284,8 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
     this.pushEcommerce('remove_from_cart', {
       currency: data.currency,
       value: this.monetaryValue(data.value),
-      items: this.getItems(data)
+      items: this.getItems(data),
+      ...(data.eventId ? { event_id: data.eventId} : {}),
     })
   }
 
@@ -285,7 +294,8 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       currency: data.currency,
       totalQuantity: data.totalQuantity,
       value: this.monetaryValue(data.value),
-      items: this.getItems(data)
+      items: this.getItems(data),
+      ...(data.eventId ? { event_id: data.eventId} : {}),
     })
   }
 
@@ -293,7 +303,8 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
     this.pushEcommerce('view_item', {
       currency: data.currency,
       value: this.monetaryValue(data.value),
-      items: this.getItems(data)
+      items: this.getItems(data),
+      ...(data.eventId ? { event_id: data.eventId} : {}),
     })
   }
 
@@ -304,7 +315,8 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       items: this.getItems(data, {
         item_list_name: data.listName,
         item_list_id: data.listId
-      })
+      }),
+      ...(data.eventId ? { event_id: data.eventId} : {}),
     })
   }
 
@@ -404,7 +416,8 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
     this.pushCommon('login', {
       method: data.method,
       user_id: data.user_id || '',
-      client_id: data.client_id || data.id || ''
+      client_id: data.client_id || data.id || '',
+      ...(data.eventId ? { event_id: data.eventId} : {}),
     })
   }
 
@@ -413,7 +426,8 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
     this.pushCommon('sign_up', {
       method: data.method,
       user_id: data.user_id || '',
-      client_id: data.client_id || data.id || ''
+      client_id: data.client_id || data.id || '',
+      ...(data.eventId ? { event_id: data.eventId} : {}),
     })
   }
 }
