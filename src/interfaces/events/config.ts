@@ -152,6 +152,8 @@ export interface ViewItemConfig extends AnalyticsEventConfig {
 export interface ViewItemListConfig extends AnalyticsEventConfig {
   listId: string,
   listName: string,
+  category?: string,
+  brand?: string,
   items: Array<Item>
   eventId?: string
 }
