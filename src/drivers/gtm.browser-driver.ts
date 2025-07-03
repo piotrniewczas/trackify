@@ -418,6 +418,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       user_id: data.user_id || '',
       client_id: data.client_id || data.id || '',
       ...(data.eventId ? { event_id: data.eventId} : {}),
+      is_premium: data.isPremium || '',
     })
   }
 
