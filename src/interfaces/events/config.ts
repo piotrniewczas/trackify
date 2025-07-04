@@ -53,7 +53,8 @@ export interface CustomerConfig extends AnalyticsEventConfig {
   province?: string;
   zipCode?: string;
   country?: string;
-  eventId?: string
+  eventId?: string;
+  isPremium?: string;
 }
 
 export interface LoginConfig extends AnalyticsEventConfig {
@@ -65,7 +66,8 @@ export interface LoginConfig extends AnalyticsEventConfig {
   shop_id?: string; // shop_id when multisite
   user_id?: string; //sha256 from email
   client_id?: string; //user id from site
-  eventId?: string
+  eventId?: string;
+  isPremium?: string;
 }
 
 export interface SubscribeConfig extends AnalyticsEventConfig {
