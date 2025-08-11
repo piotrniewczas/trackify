@@ -127,6 +127,7 @@ export interface PurchaseConfig extends AnalyticsEventConfig {
   event?: string, // TradeDoubler event ID
   organization?: string // TradeDoubler organization ID
   eventId?: string
+  isPremium?: string
 }
 
 export interface RemoveFromCartConfig extends AnalyticsEventConfig {

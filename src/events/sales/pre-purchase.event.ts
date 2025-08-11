@@ -25,6 +25,7 @@ export class PrePurchaseEvent extends AbstractSalesEvent implements AnalyticsEve
       } : undefined,
       event: this.config.event,
       organization: this.config.organization,
+      ...(this.config.isPremium ? { isPremium: this.config.isPremium} : {}),
       ...(this.config.eventId ? { eventId: this.config.eventId} : {}),
     }
   }
