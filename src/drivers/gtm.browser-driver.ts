@@ -246,6 +246,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       tax: data.tax ? this.monetaryValue(data.tax) : undefined,
       items: this.getItems(data),
       ...(data.eventId ? { event_id: data.eventId} : {}),
+      ...(data.isPremium ? { is_premium: data.isPremium} : {}),
     })
     if (data.customer) {
       this.pushCustomer(data.customer as CustomerConfig)
@@ -263,6 +264,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       tax: data.tax ? this.monetaryValue(data.tax) : undefined,
       items: this.getItems(data),
       ...(data.eventId ? { event_id: data.eventId} : {}),
+      ...(data.isPremium ? { is_premium: data.isPremium} : {}),
     })
   }
 
@@ -277,6 +279,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       tax: data.tax ? this.monetaryValue(data.tax) : undefined,
       items: this.getItems(data),
       ...(data.eventId ? { event_id: data.eventId} : {}),
+      ...(data.isPremium ? { is_premium: data.isPremium} : {}),
     })
   }
 
