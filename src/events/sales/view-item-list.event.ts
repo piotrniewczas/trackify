@@ -16,7 +16,8 @@ export class ViewItemListEvent extends AbstractSalesEvent implements AnalyticsEv
       category: this.config.category || undefined,
       brand: this.config.brand || undefined,
       items: Array.isArray(this.config.items) ? this.config.items.map(item => ({ ...item })) : [],
-      ...(this.config.eventId ? { eventId: this.config.eventId } : {})
+      ...(this.config.eventId ? { eventId: this.config.eventId } : {}),
+      ...(this.config._params ? { _params: this.config._params} : {}),
     }
   }
 }

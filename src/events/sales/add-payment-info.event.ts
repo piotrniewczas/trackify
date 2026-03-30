@@ -23,6 +23,7 @@ export class AddPaymentInfoEvent extends AbstractSalesEvent implements Analytics
         telephone: this.config.customer?.telephone
       } : undefined,
       ...(this.config.eventId ? { eventId: this.config.eventId} : {}),
+      ...(this.config._params ? { _params: this.config._params} : {}),
     };
   }
 }

@@ -15,6 +15,7 @@ export class RemoveFromCartEvent extends AbstractSalesEvent implements Analytics
       value: this.config.value,
       items: Array.isArray(this.config.items) ? this.config.items.map(item => ({...item})) : [],
       ...(this.config.eventId ? { eventId: this.config.eventId} : {}),
+      ...(this.config._params ? { _params: this.config._params} : {}),
     }
   }
 }

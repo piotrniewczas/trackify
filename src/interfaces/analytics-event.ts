@@ -1,7 +1,9 @@
 import { TrackifyGlobals } from './trackify-globals'
 import { CustomerConfig } from "./events/config";
 
-export type AnalyticsEventConfig = Record<string, string | number | undefined | Array<Record<string, string | number | undefined>> | Record<string, string | number | undefined> | CustomerConfig>;
+export type AnalyticsEventConfig = Record<string, string | number | undefined | Array<Record<string, string | number | undefined>> | Record<string, string | number | undefined> | CustomerConfig> & {
+  _params?: Record<string, string | number | undefined>
+};
 
 export interface AnalyticsEvent<T> {
   name: string;

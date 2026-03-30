@@ -202,7 +202,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       payment_type: data.paymentMethod,
       items: this.getItems(data),
       ...(data.eventId ? { event_id: data.eventId} : {}),
-    })
+    }, data._params)
   }
 
   protected async trackAddShippingInfo (data: AddShippingInfoConfig): Promise<void> {
@@ -213,7 +213,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       shipping_tier: data.shippingTier,
       items: this.getItems(data),
       ...(data.eventId ? { event_id: data.eventId} : {}),
-    })
+    }, data._params)
   }
 
   protected async trackAddToCart (data: AddToCartConfig): Promise<void> {
@@ -222,7 +222,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       value: this.monetaryValue(data.value),
       items: this.getItems(data),
       ...(data.eventId ? { event_id: data.eventId} : {}),
-    })
+    }, data._params)
   }
 
   protected async trackBeginCheckout (data: BeginCheckoutConfig): Promise<void> {
@@ -232,7 +232,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       coupon: data.coupon,
       items: this.getItems(data),
       ...(data.eventId ? { event_id: data.eventId} : {}),
-    })
+    }, data._params)
   }
 
   protected async trackPurchase (data: PurchaseConfig): Promise<void> {
@@ -247,7 +247,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       items: this.getItems(data),
       ...(data.eventId ? { event_id: data.eventId} : {}),
       ...(data.isPremium ? { is_premium: data.isPremium} : {}),
-    })
+    }, data._params)
     if (data.customer) {
       this.pushCustomer(data.customer as CustomerConfig)
     }
@@ -265,7 +265,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       items: this.getItems(data),
       ...(data.eventId ? { event_id: data.eventId} : {}),
       ...(data.isPremium ? { is_premium: data.isPremium} : {}),
-    })
+    }, data._params)
   }
 
   protected async trackTypPurchase (data: PurchaseConfig): Promise<void> {
@@ -280,7 +280,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       items: this.getItems(data),
       ...(data.eventId ? { event_id: data.eventId} : {}),
       ...(data.isPremium ? { is_premium: data.isPremium} : {}),
-    })
+    }, data._params)
   }
 
   protected async trackRemoveFromCart (data: RemoveFromCartConfig): Promise<void> {
@@ -289,7 +289,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       value: this.monetaryValue(data.value),
       items: this.getItems(data),
       ...(data.eventId ? { event_id: data.eventId} : {}),
-    })
+    }, data._params)
   }
 
   protected async trackViewCart (data: ViewCartConfig): Promise<void> {
@@ -299,7 +299,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       value: this.monetaryValue(data.value),
       items: this.getItems(data),
       ...(data.eventId ? { event_id: data.eventId} : {}),
-    })
+    }, data._params)
   }
 
   protected async trackViewItem (data: ViewItemConfig): Promise<void> {
@@ -308,7 +308,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
       value: this.monetaryValue(data.value),
       items: this.getItems(data),
       ...(data.eventId ? { event_id: data.eventId} : {}),
-    })
+    }, data._params)
   }
 
   protected async trackViewItemList (data: ViewItemListConfig): Promise<void> {
@@ -320,7 +320,7 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
         item_list_id: data.listId
       }),
       ...(data.eventId ? { event_id: data.eventId} : {}),
-    })
+    }, data._params)
   }
 
   protected getItems (data: SupportedEventData, defaults: Partial<GTMItem> = {}): Array<GTMItem> {
@@ -370,12 +370,14 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
 
   protected pushEcommerce (
     eventName: string,
-    payload: Record<string, string | number | keyof typeof CurrencyCode | Array<GTMItem> | undefined>
+    payload: Record<string, string | number | keyof typeof CurrencyCode | Array<GTMItem> | undefined>,
+    params?: Record<string, string | number | undefined>
   ): void {
     (window[this.layerId] as Array<unknown>).push({ ecommerce: null });
     (window[this.layerId] as Array<unknown>).push({
       event: eventName,
-      ecommerce: payload
+      ecommerce: payload,
+      ...params
     })
   }
 

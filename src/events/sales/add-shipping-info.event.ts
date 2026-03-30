@@ -17,6 +17,7 @@ export class AddShippingInfoEvent extends AbstractSalesEvent implements Analytic
       shippingTier: this.config.shippingTier,
       items: Array.isArray(this.config.items) ? this.config.items.map(item => ({...item})) : [],
       ...(this.config.eventId ? { eventId: this.config.eventId} : {}),
+      ...(this.config._params ? { _params: this.config._params} : {}),
     };
   }
 }
