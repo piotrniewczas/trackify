@@ -175,8 +175,10 @@ export default class GTMBrowserDriver implements AnalyticsDriver {
     ev.payload = data.event_payload as Record<string, unknown>
 
     switch (ev.type) {
-      case 'ecommerce':
-        return this.pushEcommerce(ev.name, ev.payload)
+      case 'ecommerce': {
+        const { _params, ...payload } = ev.payload as Record<string, unknown>
+        return this.pushEcommerce(ev.name, payload as Record<string, string | number | undefined>, _params as Record<string, string | number | undefined>)
+        }
       case 'common':
         return this.pushCommon(ev.name, ev.payload)
       default:
